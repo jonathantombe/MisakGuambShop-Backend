@@ -28,7 +28,7 @@ public class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @BeforeEach
     public void setup() {
@@ -64,7 +64,7 @@ public class UserServiceTest {
         User user2 = new User();
         user2.setId(2L);
 
-        when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
+        when(userRepository.findAllWithRoles()).thenReturn(Arrays.asList(user1, user2));
 
         List<User> users = userService.getAllUsers();
 

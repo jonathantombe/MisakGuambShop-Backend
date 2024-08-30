@@ -1,5 +1,6 @@
 package com.misakguambshop.app.config;
 
+
 import com.misakguambshop.app.model.ERole;
 import com.misakguambshop.app.model.Role;
 import com.misakguambshop.app.model.User;
@@ -43,13 +44,13 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createAdminUser() {
-        if (!userRepository.existsByEmail("admin@example.com")) {
+        if (!userRepository.existsByEmail("admin@gmail.com")) {
             Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Admin Role is not found."));
 
             User admin = new User();
             admin.setUsername("admin");
-            admin.setEmail("admin@example.com");
+            admin.setEmail("admin@gmail.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRoles(new HashSet<>(Arrays.asList(adminRole)));
 

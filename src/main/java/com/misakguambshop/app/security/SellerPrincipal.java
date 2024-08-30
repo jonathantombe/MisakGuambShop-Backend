@@ -1,40 +1,32 @@
 package com.misakguambshop.app.security;
 
-import com.misakguambshop.app.model.User;
+import com.misakguambshop.app.model.Seller;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
-public class UserPrincipal implements UserDetails {
+public class SellerPrincipal implements UserDetails {
     private Long id;
-    private String username;
     private String email;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(Long id, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public SellerPrincipal(Long id, String username, String email, String password) {
         this.id = id;
-        this.username = username;
         this.email = email;
         this.password = password;
-        this.authorities = authorities;
+        this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_SELLER"));
     }
 
-    public static UserPrincipal create(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .collect(Collectors.toList());
-
-        return new UserPrincipal(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getPassword(),
-                authorities
+    public static SellerPrincipal create(Seller seller) {
+        return new SellerPrincipal(
+                seller.getId(),
+                seller.getUsername(),
+                seller.getEmail(),
+                seller.getPassword()
         );
     }
 
@@ -42,13 +34,9 @@ public class UserPrincipal implements UserDetails {
         return id;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
