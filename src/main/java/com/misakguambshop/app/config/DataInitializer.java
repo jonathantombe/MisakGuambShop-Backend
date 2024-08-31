@@ -1,6 +1,5 @@
 package com.misakguambshop.app.config;
 
-
 import com.misakguambshop.app.model.ERole;
 import com.misakguambshop.app.model.Role;
 import com.misakguambshop.app.model.User;
@@ -58,3 +57,4 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 }
+

@@ -1,6 +1,7 @@
 
 package com.misakguambshop.app.config;
 
+
 import com.misakguambshop.app.security.CustomUserDetailsService;
 import com.misakguambshop.app.security.JwtAuthenticationEntryPoint;
 import com.misakguambshop.app.security.JwtAuthenticationFilter;
@@ -65,8 +66,7 @@ public class SecurityConfig {
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/auth/signup/user").permitAll()
                                 .requestMatchers("/api/auth/signup/seller").permitAll()
-                                .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "USER")
-                                .requestMatchers("/api/sellers/**").hasAnyRole("ADMIN", "SELLER")
+                                .requestMatchers("/api/users/**").authenticated()
                                 .anyRequest().authenticated()
                 );
 
