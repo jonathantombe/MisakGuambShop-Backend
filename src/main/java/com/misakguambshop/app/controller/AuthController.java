@@ -1,8 +1,10 @@
 package com.misakguambshop.app.controller;
 
+import com.misakguambshop.app.dto.SellerSignupDto;
 import com.misakguambshop.app.dto.UserLoginDto;
 import com.misakguambshop.app.dto.UserSignupDto;
 import com.misakguambshop.app.model.ERole;
+import com.misakguambshop.app.model.Seller;
 import com.misakguambshop.app.model.User;
 import com.misakguambshop.app.payload.JwtAuthenticationResponse;
 import com.misakguambshop.app.repository.UserRepository;
@@ -54,10 +56,10 @@ public class AuthController {
     }
 
     @PostMapping("/signup/seller")
-    public ResponseEntity<?> registerSeller(@Valid @RequestBody UserSignupDto signUpDto) {
+    public ResponseEntity<?> registerSeller(@Valid @RequestBody SellerSignupDto signUpDto) {
         logger.info("Received seller signup request: {}", signUpDto);
         try {
-            User user = authService.registerUser(signUpDto, ERole.SELLER);
+            Seller seller = authService.registerSeller(signUpDto, ERole.SELLER);
             return ResponseEntity.ok("Seller registered successfully");
         } catch (Exception e) {
             logger.error("Error registering seller: ", e);

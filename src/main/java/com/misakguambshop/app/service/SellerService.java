@@ -35,22 +35,22 @@ public class SellerService {
     }
 
     public Seller updateSeller(Long id, Seller sellerDetails) {
-        logger.info("Iniciando actualización de vendedor con ID: {}", id);
         return sellerRepository.findById(id)
                 .map(existingSeller -> {
-                    logger.info("Vendedor encontrado: {}", existingSeller);
-                    existingSeller.setUsername(sellerDetails.getUsername());
+                    existingSeller.setFullName(sellerDetails.getFullName());
                     existingSeller.setEmail(sellerDetails.getEmail());
+                    existingSeller.setPhone(sellerDetails.getPhone());
+                    existingSeller.setCompanyName(sellerDetails.getCompanyName());
+                    existingSeller.setDescription(sellerDetails.getDescription());
+                    existingSeller.setCity(sellerDetails.getCity());
+
                     if (sellerDetails.getPassword() != null && !sellerDetails.getPassword().isEmpty()) {
                         existingSeller.setPassword(passwordEncoder.encode(sellerDetails.getPassword()));
                     }
-                    logger.info("Guardando vendedor actualizado: {}", existingSeller);
+
                     return sellerRepository.save(existingSeller);
                 })
-                .orElseGet(() -> {
-                    logger.warn("No se encontró vendedor con ID: {}", id);
-                    return null;
-                });
+                .orElseGet(() -> null);
     }
 
     public void deleteSeller(Long id) {
