@@ -1,5 +1,6 @@
 package com.misakguambshop.app.security;
 
+import com.misakguambshop.app.model.Seller;
 import com.misakguambshop.app.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,6 +38,19 @@ public class UserPrincipal implements UserDetails {
                 authorities
         );
     }
+
+    public static UserPrincipal create(Seller seller) {
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_SELLER"));
+
+        return new UserPrincipal(
+                seller.getId(),
+                seller.getEmail(), // Asumimos que el email se usa como username para vendedores
+                seller.getEmail(),
+                seller.getPassword(),
+                authorities
+        );
+    }
+
 
     public Long getId() {
         return id;
