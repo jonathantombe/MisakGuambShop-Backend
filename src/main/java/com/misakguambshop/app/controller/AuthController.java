@@ -46,7 +46,7 @@ public class AuthController {
     @PostMapping("/signup/user")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserSignupDto signUpDto) {
         try {
-            User user = authService.registerUser(signUpDto, ERole.ROLE_USER);
+            User user = authService.registerUser(signUpDto, ERole.USER);
             return ResponseEntity.ok("User registered successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
@@ -57,7 +57,7 @@ public class AuthController {
     public ResponseEntity<?> registerSeller(@Valid @RequestBody UserSignupDto signUpDto) {
         logger.info("Received seller signup request: {}", signUpDto);
         try {
-            User user = authService.registerUser(signUpDto, ERole.ROLE_SELLER);
+            User user = authService.registerUser(signUpDto, ERole.SELLER);
             return ResponseEntity.ok("Seller registered successfully");
         } catch (Exception e) {
             logger.error("Error registering seller: ", e);

@@ -40,6 +40,7 @@ public class UserControllerTest {
         userDto.setEmail("test@example.com");
         userDto.setPassword("password");
 
+
         User user = new User();
         user.setId(1L);
         user.setUsername("testuser");

@@ -126,7 +126,7 @@ public class UserServiceTest {
 
     @Test
     public void testFindByUsername() {
-        User user = new User("testuser", "test@example.com", "password");
+        User user = new User("testuser", "test@example.com", "password", "1234567890");
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.findByUsername("testuser");
@@ -137,7 +137,7 @@ public class UserServiceTest {
 
     @Test
     public void testFindByEmail() {
-        User user = new User("testuser", "test@example.com", "password");
+        User user = new User("testuser", "test@example.com", "password", "1234567890");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.findByEmail("test@example.com");

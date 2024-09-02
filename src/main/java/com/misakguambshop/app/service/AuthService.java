@@ -56,7 +56,8 @@ public class AuthService {
         User user = new User(
                 signUpDto.getUsername(),
                 signUpDto.getEmail(),
-                passwordEncoder.encode(signUpDto.getPassword())
+                passwordEncoder.encode(signUpDto.getPassword()),
+                signUpDto.getPhone()
         );
 
         Role role = roleRepository.findByName(roleType)
