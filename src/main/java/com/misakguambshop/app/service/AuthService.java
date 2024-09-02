@@ -40,6 +40,7 @@ public class AuthService {
     private RoleRepository roleRepository;
 
     @Autowired
+    git 
     private SellerRepository sellerRepository;
 
     public String authenticateUser(UserLoginDto loginDto) {
