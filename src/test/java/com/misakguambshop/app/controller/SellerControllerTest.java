@@ -77,9 +77,13 @@ class SellerControllerTest {
     void updateSeller() {
         Seller seller = new Seller();
         seller.setId(1L);
-        seller.setUsername("Updated Seller");
+        seller.setFullName("Updated Seller");
         seller.setEmail("updated@example.com");
         seller.setPassword("newPassword");
+        seller.setPhone("1234567890");
+        seller.setCompanyName("Updated Company");
+        seller.setDescription("Updated Description");
+        seller.setCity("Updated City");
         when(sellerService.updateSeller(eq(1L), any(Seller.class))).thenReturn(seller);
 
         ResponseEntity<Seller> response = sellerController.updateSeller(1L, seller);

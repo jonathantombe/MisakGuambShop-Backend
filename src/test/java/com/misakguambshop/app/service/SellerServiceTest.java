@@ -60,12 +60,12 @@ class SellerServiceTest {
     void updateSeller() {
         Seller existingSeller = new Seller();
         existingSeller.setId(1L);
-        existingSeller.setUsername("Old Username");
+        existingSeller.setFullName("Old FullName");
         existingSeller.setEmail("old@example.com");
         existingSeller.setPassword("oldPassword");
 
         Seller updatedDetails = new Seller();
-        updatedDetails.setUsername("New Username");
+        updatedDetails.setFullName("New FullName");
         updatedDetails.setEmail("new@example.com");
         updatedDetails.setPassword("newPassword");
 
@@ -76,7 +76,7 @@ class SellerServiceTest {
         Seller result = sellerService.updateSeller(1L, updatedDetails);
 
         assertNotNull(result);
-        assertEquals("New Username", result.getUsername());
+        assertEquals("New FullName", result.getFullName());
         assertEquals("new@example.com", result.getEmail());
         assertEquals("newPassword", result.getPassword());
         verify(sellerRepository, times(1)).findById(1L);
@@ -88,12 +88,12 @@ class SellerServiceTest {
     void updateSellerWithoutPassword() {
         Seller existingSeller = new Seller();
         existingSeller.setId(1L);
-        existingSeller.setUsername("Old Username");
+        existingSeller.setFullName("Old FullName");
         existingSeller.setEmail("old@example.com");
         existingSeller.setPassword("oldPassword");
 
         Seller updatedDetails = new Seller();
-        updatedDetails.setUsername("New Username");
+        updatedDetails.setFullName("New FullName");
         updatedDetails.setEmail("new@example.com");
         // No se establece una nueva contraseña
 
@@ -103,7 +103,7 @@ class SellerServiceTest {
         Seller result = sellerService.updateSeller(1L, updatedDetails);
 
         assertNotNull(result);
-        assertEquals("New Username", result.getUsername());
+        assertEquals("New FullName", result.getFullName());
         assertEquals("new@example.com", result.getEmail());
         assertEquals("oldPassword", existingSeller.getPassword());
         verify(sellerRepository, times(1)).findById(1L);
