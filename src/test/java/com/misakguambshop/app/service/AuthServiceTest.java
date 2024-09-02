@@ -73,7 +73,6 @@ public class AuthServiceTest {
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(roleRepository.findByName(any(ERole.class))).thenReturn(Optional.of(new Role()));
         when(userRepository.save(any(User.class))).thenReturn(new User());
-
         User registeredUser = authService.registerUser(signUpDto, ERole.USER);
 
         assertNotNull(registeredUser);
@@ -99,7 +98,6 @@ public class AuthServiceTest {
         assertNotNull(registeredSeller);
         verify(userRepository, times(1)).save(any(User.class));
         verify(roleRepository, times(1)).findByName(ERole.SELLER);
-    }
 
     @Test
     public void testRegisterUserUsernameExists() {
@@ -125,7 +123,7 @@ public class AuthServiceTest {
 
         when(userRepository.existsByUsername(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
-
         assertThrows(RuntimeException.class, () -> authService.registerUser(signUpDto, ERole.USER));
+   
     }
 }

@@ -68,7 +68,6 @@ public class AuthControllerTest {
         signUpDto.setPhone("9876543210");
 
         when(authService.registerUser(any(UserSignupDto.class), eq(ERole.SELLER))).thenReturn(new User());
-
         mockMvc.perform(post("/api/auth/signup/seller")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signUpDto)))

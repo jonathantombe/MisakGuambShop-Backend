@@ -32,7 +32,6 @@ public class UserSignupDto {
         this.email = email;
         this.password = password;
         this.phone = phone;
-    }
 
     public String getUsername() {
         return username;
@@ -65,7 +64,6 @@ public class UserSignupDto {
     public void setPhone(String phone) {
         this.phone = phone;
     }
-
 
     @Override
     public String toString() {
