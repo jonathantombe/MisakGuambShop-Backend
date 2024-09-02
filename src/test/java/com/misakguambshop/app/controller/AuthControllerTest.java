@@ -51,6 +51,7 @@ public class AuthControllerTest {
         signupDto.setUsername("testuser");
         signupDto.setEmail("test@example.com");
         signupDto.setPassword("password");
+        signupDto.setPhone("1234567890");
 
         mockMvc.perform(post("/api/auth/signup/user")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -64,9 +65,9 @@ public class AuthControllerTest {
         signUpDto.setUsername("testseller");
         signUpDto.setEmail("seller@example.com");
         signUpDto.setPassword("password");
+        signUpDto.setPhone("9876543210");
 
-        when(authService.registerUser(any(UserSignupDto.class), eq(ERole.ROLE_SELLER))).thenReturn(new User());
-
+        when(authService.registerUser(any(UserSignupDto.class), eq(ERole.SELLER))).thenReturn(new User());
         mockMvc.perform(post("/api/auth/signup/seller")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signUpDto)))

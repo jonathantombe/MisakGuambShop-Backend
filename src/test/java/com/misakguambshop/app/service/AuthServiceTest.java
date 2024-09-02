@@ -67,17 +67,17 @@ public class AuthServiceTest {
         signUpDto.setUsername("testuser");
         signUpDto.setEmail("test@example.com");
         signUpDto.setPassword("password");
+        signUpDto.setPhone("1234567890");
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(roleRepository.findByName(any(ERole.class))).thenReturn(Optional.of(new Role()));
         when(userRepository.save(any(User.class))).thenReturn(new User());
-
-        User registeredUser = authService.registerUser(signUpDto, ERole.ROLE_USER);
+        User registeredUser = authService.registerUser(signUpDto, ERole.USER);
 
         assertNotNull(registeredUser);
         verify(userRepository, times(1)).save(any(User.class));
-        verify(roleRepository, times(1)).findByName(ERole.ROLE_USER);
+        verify(roleRepository, times(1)).findByName(ERole.USER);
     }
 
     @Test
@@ -86,18 +86,18 @@ public class AuthServiceTest {
         signUpDto.setUsername("testseller");
         signUpDto.setEmail("seller@example.com");
         signUpDto.setPassword("password");
+        signUpDto.setPhone("1234567890");
 
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(roleRepository.findByName(any(ERole.class))).thenReturn(Optional.of(new Role()));
         when(userRepository.save(any(User.class))).thenReturn(new User());
 
-        User registeredSeller = authService.registerUser(signUpDto, ERole.ROLE_SELLER);
+        User registeredSeller = authService.registerUser(signUpDto, ERole.SELLER);
 
         assertNotNull(registeredSeller);
         verify(userRepository, times(1)).save(any(User.class));
-        verify(roleRepository, times(1)).findByName(ERole.ROLE_SELLER);
-    }
+        verify(roleRepository, times(1)).findByName(ERole.SELLER);
 
     @Test
     public void testRegisterUserUsernameExists() {
@@ -105,10 +105,11 @@ public class AuthServiceTest {
         signUpDto.setUsername("testuser");
         signUpDto.setEmail("test@example.com");
         signUpDto.setPassword("password");
+        signUpDto.setPhone("1234567890");
 
         when(userRepository.existsByUsername(anyString())).thenReturn(true);
 
-        assertThrows(RuntimeException.class, () -> authService.registerUser(signUpDto, ERole.ROLE_USER));
+        assertThrows(RuntimeException.class, () -> authService.registerUser(signUpDto, ERole.USER));
     }
 
     @Test
@@ -117,10 +118,12 @@ public class AuthServiceTest {
         signUpDto.setUsername("testuser");
         signUpDto.setEmail("test@example.com");
         signUpDto.setPassword("password");
+        signUpDto.setPhone("1234567890");
+
 
         when(userRepository.existsByUsername(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
-
-        assertThrows(RuntimeException.class, () -> authService.registerUser(signUpDto, ERole.ROLE_USER));
+        assertThrows(RuntimeException.class, () -> authService.registerUser(signUpDto, ERole.USER));
+   
     }
 }
