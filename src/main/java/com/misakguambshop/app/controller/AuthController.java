@@ -50,6 +50,7 @@ public class AuthController {
         try {
             User user = authService.registerUser(signUpDto, ERole.USER);
             return ResponseEntity.ok("User registered successfully");
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }

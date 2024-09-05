@@ -70,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isPublicRoute(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth/") || path.equals("/api/public") || path.equals("/api/auth/signup") || path.equals("/api/auth/signup/user") || path.equals("/api/auth/signup/seller");
+        return path.startsWith("/api/auth/") || path.equals("/api/public") || path.equals("/api/auth/signup") || path.equals("/api/auth/signup/user") || path.equals("/api/auth/signup/seller") ;
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

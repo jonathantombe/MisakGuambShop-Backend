@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -41,7 +43,7 @@ public class SellerController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SELLER') and @sellerSecurity.hasSellerId(authentication, #id))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('SELLER') and @sellerSecurity.hasSellerId(authentication, #id))")
     public ResponseEntity<Seller> updateSeller(@PathVariable Long id, @RequestBody Seller sellerDetails) {
         Seller updatedSeller = sellerService.updateSeller(id, sellerDetails);
         if (updatedSeller != null) {
@@ -52,12 +54,15 @@ public class SellerController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_SELLER') and @sellerSecurity.hasSellerId(authentication, #id))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('SELLER') and @sellerSecurity.hasSellerId(authentication, #id))")
     public ResponseEntity<?> deleteSeller(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        logger.debug("Attempting to delete seller with ID: {}. User roles: {}", id, auth.getAuthorities());
         try {
             sellerService.deleteSeller(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
+            logger.error("Error deleting seller with ID: {}", id, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
