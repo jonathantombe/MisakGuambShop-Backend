@@ -73,6 +73,11 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasAnyAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER", "USER")
+                                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+                                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+                                .requestMatchers(HttpMethod.PATCH, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
                                 .anyRequest().authenticated()
                 );
 
