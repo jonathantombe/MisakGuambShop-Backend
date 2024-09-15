@@ -1,6 +1,4 @@
-
 package com.misakguambshop.app.config;
-
 
 import com.misakguambshop.app.security.CustomUserDetailsService;
 import com.misakguambshop.app.security.JwtAuthenticationEntryPoint;
@@ -20,8 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
 @EnableWebSecurity
@@ -58,26 +58,28 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+        MvcRequestMatcher.Builder mvcMatcherBuilder = new MvcRequestMatcher.Builder(introspector);
+
         http
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/auth/signup/user").permitAll()
-                                .requestMatchers("/api/auth/signup/seller").permitAll()
-                                .requestMatchers("/api/sellers/**").hasAnyRole("ADMIN", "SELLER")
-                                .requestMatchers("/api/users/**").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/api/categories/**").hasAnyAuthority("ADMIN", "SELLER", "USER")
-                                .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasAnyAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasAnyAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER", "USER")
-                                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
-                                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
-                                .requestMatchers(HttpMethod.PATCH, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
-                                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyAuthority("ADMIN", "SELLER")
+                        auth.requestMatchers(mvcMatcherBuilder.pattern("/api/auth/**")).permitAll()
+                                .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/user")).permitAll()
+                                .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/seller")).permitAll()
+                                .requestMatchers(mvcMatcherBuilder.pattern("/api/sellers/**")).hasAnyRole("ADMIN", "SELLER")
+                                .requestMatchers(mvcMatcherBuilder.pattern("/api/users/**")).authenticated()
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/categories/**")).hasAuthority("ADMIN")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/**")).hasAuthority("ADMIN")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/categories/**")).hasAuthority("ADMIN")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
                                 .anyRequest().authenticated()
                 );
 
