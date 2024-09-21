@@ -19,6 +19,7 @@ public class ProductDto {
     @Digits(integer = 10, fraction = 2, message = "Price can have up to 10 digits and 2 decimal places")
     private BigDecimal price;
 
+    @NotNull(message = "Category ID is required")
     private Long categoryId;  // Este campo existe pero no tiene getters ni setters
 
     @NotNull(message = "Seller ID is required")
