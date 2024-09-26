@@ -69,8 +69,15 @@ public class SecurityConfig {
                         auth.requestMatchers(mvcMatcherBuilder.pattern("/api/auth/**")).permitAll()
                                 .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/user")).permitAll()
                                 .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/seller")).permitAll()
-                                .requestMatchers(mvcMatcherBuilder.pattern("/api/sellers/**")).hasAnyRole("ADMIN", "SELLER")
-                                .requestMatchers(mvcMatcherBuilder.pattern("/api/users/**")).authenticated()
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/users")).hasAuthority("ADMIN")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/users/{id}")).hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/request-reactivation")).permitAll()
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/forgot-password")).permitAll()
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/reset-password")).permitAll()
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/{id}")).hasAnyAuthority("ADMIN","USER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/reactivate")).permitAll()
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/users/{id}/deactivate")).hasAnyAuthority("ADMIN", "USER")
+                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/users/{id}")).hasAnyAuthority("ADMIN", "USER")
                                 .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                                 .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/categories/**")).hasAuthority("ADMIN")
                                 .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/**")).hasAuthority("ADMIN")
@@ -100,7 +107,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173")
+                        .allowedOrigins("http://localhost:3000")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

@@ -14,4 +14,13 @@ public interface UserService {
     void deleteUser(Long id);
     Optional<User> findByUsername(String testuser);
     Optional<User> findByEmail(String mail);
+
+
+    void deactivateUser(Long id);
+    String forgotPassword(String email);
+
+    String requestReactivation(String email);
+    String reactivateAccount(String token);
+
+    String resetPassword(String token, String newPassword);
 }

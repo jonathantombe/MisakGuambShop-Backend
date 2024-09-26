@@ -56,7 +56,12 @@ public class AuthService {
 
     public User registerUser(UserSignupDto signUpDto, ERole roleType) {
         if(userRepository.existsByEmail(signUpDto.getEmail())) {
-            throw new RuntimeException("Error: Email is already in use!");
+            throw new RuntimeException("El correo electrónico ya está en uso");
+        }
+
+        // Validar si las contraseñas coinciden
+        if (!signUpDto.getPassword().equals(signUpDto.getConfirmPassword())) {
+            throw new RuntimeException("Las contraseñas no coinciden");
         }
 
         User user = new User(
@@ -67,7 +72,7 @@ public class AuthService {
         );
 
         Role role = roleRepository.findByName(roleType)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                .orElseThrow(() -> new RuntimeException("no se encuentra el rol."));
 
         user.setRoles(Collections.singleton(role));
 
@@ -76,7 +81,7 @@ public class AuthService {
 
     public Seller registerSeller(SellerSignupDto signUpDto, ERole roleType) {
         if(userRepository.existsByEmail(signUpDto.getEmail())) {
-            throw new RuntimeException("Error: Email is already in use!");
+            throw new RuntimeException("El correo electrónico ya está en uso");
         }
 
         Seller seller = new Seller();
@@ -89,7 +94,7 @@ public class AuthService {
         seller.setCity(signUpDto.getCity());
 
         Role role = roleRepository.findByName(roleType)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                .orElseThrow(() -> new RuntimeException("no se encuentra el rol."));
 
         seller.setRoles(Collections.singleton(role));
 
