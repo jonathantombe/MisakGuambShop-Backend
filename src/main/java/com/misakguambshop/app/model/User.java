@@ -53,6 +53,8 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updated_at;
 
+    private String profileImageUrl;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),

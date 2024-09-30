@@ -15,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +71,12 @@ public class UserController {
         String message = userService.forgotPassword(email);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
+    @PostMapping("/{id}/profile-image")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<User> uploadProfileImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) {
+        User updatedUser = userService.uploadProfileImage(id, file);
+        return ResponseEntity.ok(updatedUser);
+    }
 
     @PutMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
@@ -104,6 +112,14 @@ public class UserController {
         }
     }
 
+    @PutMapping("/{id}/profile-image")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<User> updateProfileImage(@PathVariable Long id, @RequestParam("image") MultipartFile file) {
+        User updatedUser = userService.updateProfileImage(id, file);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+
     @PatchMapping("/{id}/deactivate")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ResponseEntity<?> deactivateUser(@PathVariable Long id) {
@@ -116,5 +132,12 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/{id}/profile-image")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<User> deleteProfileImage(@PathVariable Long id) {
+        User updatedUser = userService.deleteProfileImage(id);
+        return ResponseEntity.ok(updatedUser);
     }
 }
