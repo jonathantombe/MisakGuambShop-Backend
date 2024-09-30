@@ -1,11 +1,12 @@
 package com.misakguambshop.app.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Data
@@ -34,11 +35,59 @@ public class UserDto {
     @NotBlank(message = "Debe confirmar su contraseña.")
     private String confirmPassword;
 
+    @NotNull(message = "La imagen de perfil es obligatoria")
+    private MultipartFile profileImage;
+
+    @Pattern(regexp = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*/?$",
+            message = "La URL de la imagen de perfil debe ser una URL válida")
+    @Size(max = 255, message = "La URL de la imagen de perfil no debe exceder los 255 caracteres")
+    private String profileImageUrl;
+
+    private boolean isActive = true;
+
     private LocalDateTime creationDate;
     private LocalDateTime updateDate;
 
-    // Valida si la confirmación de la contraseña coincide con la contraseña
     public boolean isPasswordConfirmed() {
         return this.password != null && this.password.equals(this.confirmPassword);
     }
+
+    public boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+     
+    public boolean isValidProfileImage() throws IOException {
+        if (profileImage == null || profileImage.isEmpty()) {
+            return false; // La imagen es obligatoria
+        }
+
+        // Validar tamaño
+        if (profileImage.getSize() > 5 * 1024 * 1024) {
+            return false; // La imagen excede 5MB
+        }
+
+        String contentType = profileImage.getContentType();
+        if (contentType == null || !(contentType.equals("image/png") ||
+                contentType.equals("image/jpeg") ||
+                contentType.equals("image/jpg"))) {
+            return false;
+        }
+
+        // Validar dimensiones
+        BufferedImage img = ImageIO.read(profileImage.getInputStream());
+        int width = img.getWidth();
+        int height = img.getHeight();
+        if (width < 200 || width > 1024 || height < 200 || height > 1024) {
+            return false;
+        }
+
+        // La validación de contenido explícito se implementaría aquí
+
+        return true;
+    }
+
 }

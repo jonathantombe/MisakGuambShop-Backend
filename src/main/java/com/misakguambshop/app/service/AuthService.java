@@ -55,8 +55,12 @@ public class AuthService {
     }
 
     public User registerUser(UserSignupDto signUpDto, ERole roleType) {
+        if(userRepository.existsByUsername(signUpDto.getUsername())) {
+            throw new IllegalArgumentException("El nombre de usuario ya está en uso");
+        }
+
         if(userRepository.existsByEmail(signUpDto.getEmail())) {
-            throw new RuntimeException("El correo electrónico ya está en uso");
+            throw new IllegalArgumentException("El correo electrónico ya está en uso");
         }
 
         // Validar si las contraseñas coinciden

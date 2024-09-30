@@ -1,9 +1,13 @@
 package com.misakguambshop.app.service;
 
+import com.misakguambshop.app.controller.UserController;
 import com.misakguambshop.app.dto.UserDto;
 import com.misakguambshop.app.exception.ResourceNotFoundException;
 import com.misakguambshop.app.model.User;
 import com.misakguambshop.app.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,6 +15,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -30,6 +35,11 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 
     @Override
@@ -282,4 +292,57 @@ public class UserServiceImpl implements UserService {
 
         mailSender.send(message);
     }
+
+    @Override
+    @Transactional
+    public User uploadProfileImage(Long id, MultipartFile file) {
+        User user = getUserById(id);
+        if (user.getProfileImageUrl() != null) {
+            logger.warn("El usuario ya tiene una imagen de perfil. Se procederá a actualizarla.");
+        }
+        if (file != null && !file.isEmpty()) {
+            String imageUrl = cloudinaryService.uploadFile(file);
+            logger.info("Imagen subida a Cloudinary. URL: {}", imageUrl);
+            user.setProfileImageUrl(imageUrl);
+            User savedUser = userRepository.save(user);
+            logger.info("Usuario guardado con URL de imagen de perfil: {}", savedUser.getProfileImageUrl());
+            return savedUser;
+        }
+        throw new IllegalArgumentException("No se ha proporcionado una imagen válida.");
+    }
+
+    @Override
+    @Transactional
+    public User updateProfileImage(Long id, MultipartFile file) {
+        User user = getUserById(id);
+        if (file != null && !file.isEmpty()) {
+            if (user.getProfileImageUrl() != null) {
+                cloudinaryService.deleteFile(user.getProfileImageUrl());
+                logger.info("Imagen de perfil anterior eliminada de Cloudinary");
+            }
+            String imageUrl = cloudinaryService.uploadFile(file);
+            logger.info("Nueva imagen subida a Cloudinary. URL: {}", imageUrl);
+            user.setProfileImageUrl(imageUrl);
+            User savedUser = userRepository.save(user);
+            logger.info("Usuario actualizado con nueva URL de imagen de perfil: {}", savedUser.getProfileImageUrl());
+            return savedUser;
+        }
+        throw new IllegalArgumentException("No se ha proporcionado una imagen válida.");
+    }
+
+    @Override
+    @Transactional
+    public User deleteProfileImage(Long id) {
+        User user = getUserById(id);
+        if (user.getProfileImageUrl() != null) {
+            cloudinaryService.deleteFile(user.getProfileImageUrl());
+            logger.info("Imagen de perfil eliminada de Cloudinary");
+            user.setProfileImageUrl(null);
+            User savedUser = userRepository.save(user);
+            logger.info("URL de imagen de perfil eliminada del usuario");
+            return savedUser;
+        }
+        throw new IllegalStateException("El usuario no tiene una imagen de perfil para eliminar.");
+    }
+
 }
