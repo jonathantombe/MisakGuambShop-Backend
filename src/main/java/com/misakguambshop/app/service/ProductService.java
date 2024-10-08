@@ -11,8 +11,10 @@ import com.misakguambshop.app.repository.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -23,12 +25,14 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SellerRepository sellerRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, SellerRepository sellerRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, SellerRepository sellerRepository, CloudinaryService cloudinaryService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.sellerRepository = sellerRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     public List<Product> getAllProducts() {
@@ -48,18 +52,38 @@ public class ProductService {
         return productRepository.findBySellerId(sellerId);
     }
 
-    public Product createProduct(ProductDto productDto) {
+    @Transactional
+    public Product createProduct(ProductDto productDto, MultipartFile image) {
         if (productRepository.existsByNameAndSellerId(productDto.getName(), productDto.getSellerId())) {
             throw new IllegalArgumentException("A product with this name already exists for this seller");
         }
 
         Product product = new Product();
-        updateProductFromDto(product, productDto);
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setPrice(productDto.getPrice());
+        product.setStock(productDto.getStock());
+
+        Category category = categoryRepository.findById(productDto.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productDto.getCategoryId()));
+        product.setCategory(category);
+
+        Seller seller = sellerRepository.findById(productDto.getSellerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + productDto.getSellerId()));
+        product.setSeller(seller);
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = cloudinaryService.uploadFile(image);
+            product.setImageUrl(imageUrl);
+        }
+
+        product.setCreationDate(LocalDateTime.now());
+        product.setUpdateDate(LocalDateTime.now());
 
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, ProductDto productDto) {
+    public Product updateProduct(Long id, ProductDto productDto, MultipartFile image) {
         Product product = getProductById(id);
 
         if (!product.getName().equals(productDto.getName()) &&
@@ -69,44 +93,54 @@ public class ProductService {
 
         updateProductFromDto(product, productDto);
 
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = cloudinaryService.uploadFile(image);
+            product.setImageUrl(imageUrl);
+        }
+
         return productRepository.save(product);
     }
 
-    public Product patchProduct(Long id, Map<String, Object> updates) {
+    @Transactional
+    public Product patchProduct(Long id, ProductDto productDto, MultipartFile image) {
         Product product = getProductById(id);
 
-        updates.forEach((key, value) -> {
-            switch (key) {
-                case "name":
-                    if (value != null && !product.getName().equals(value) &&
-                            productRepository.existsByNameAndSellerId((String) value, product.getSeller().getId())) {
-                        throw new IllegalArgumentException("A product with this name already exists for this seller");
-                    }
-                    product.setName((String) value);
-                    break;
-                case "description":
-                    product.setDescription((String) value);
-                    break;
-                case "price":
-                    product.setPrice(new BigDecimal(value.toString()));
-                    break;
-                case "categoryId":
-                    if (value != null) {
-                        Category category = categoryRepository.findById(Long.valueOf(value.toString()))
-                                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + value));
-                        product.setCategory(category);
-                    } else {
-                        product.setCategory(null);
-                    }
-                    break;
-                case "imageUrl":
-                    product.setImageUrl((String) value);
-                    break;
-                case "stock":
-                    product.setStock((Integer) value);
-                    break;
+        if (productDto.getName() != null && !productDto.getName().isEmpty()) {
+            if (!product.getName().equals(productDto.getName()) &&
+                    productRepository.existsByNameAndSellerId(productDto.getName(), product.getSeller().getId())) {
+                throw new IllegalArgumentException("A product with this name already exists for this seller");
             }
-        });
+            product.setName(productDto.getName());
+        }
+
+        if (productDto.getDescription() != null) {
+            product.setDescription(productDto.getDescription());
+        }
+
+        if (productDto.getPrice() != null) {
+            product.setPrice(productDto.getPrice());
+        }
+
+        if (productDto.getStock() != null) {
+            product.setStock(productDto.getStock());
+        }
+
+        if (productDto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(productDto.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productDto.getCategoryId()));
+            product.setCategory(category);
+        }
+
+        if (productDto.getSellerId() != null) {
+            Seller seller = sellerRepository.findById(productDto.getSellerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + productDto.getSellerId()));
+            product.setSeller(seller);
+        }
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = cloudinaryService.uploadFile(image);
+            product.setImageUrl(imageUrl);
+        }
 
         return productRepository.save(product);
     }
@@ -120,17 +154,18 @@ public class ProductService {
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
-        product.setImageUrl(productDto.getImageUrl());
         product.setStock(productDto.getStock());
 
-        Category category = productDto.getCategoryId() != null ?
-                categoryRepository.findById(productDto.getCategoryId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productDto.getCategoryId()))
-                : null;
-        product.setCategory(category);
+        if (productDto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(productDto.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productDto.getCategoryId()));
+            product.setCategory(category);
+        }
 
-        Seller seller = sellerRepository.findById(productDto.getSellerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + productDto.getSellerId()));
-        product.setSeller(seller);
+        if (productDto.getSellerId() != null) {
+            Seller seller = sellerRepository.findById(productDto.getSellerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + productDto.getSellerId()));
+            product.setSeller(seller);
+        }
     }
 }
