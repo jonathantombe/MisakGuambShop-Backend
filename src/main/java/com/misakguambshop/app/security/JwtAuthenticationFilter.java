@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            // Ignora las rutas públicas
+
             if (isPublicRoute(request)) {
                 logger.info("Ruta pública detectada: " + request.getRequestURI());
                 filterChain.doFilter(request, response);
@@ -39,15 +39,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String jwt = getJwtFromRequest(request);
+            logger.info("Token JWT extraído: " + jwt);
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 Long userId = tokenProvider.getUserIdFromJWT(jwt);
                 String userEmail = tokenProvider.getUserEmailFromJWT(jwt);
                 List<String> roles = tokenProvider.getRolesFromJWT(jwt);
 
-                logger.info("JWT Token: " + jwt);
-                logger.info("User email from token: " + userEmail);
-                logger.info("User roles from token: " + roles);
+                logger.info("Token válido. ID de usuario: " + userId);
+                logger.info("Email de usuario desde el token: " + userEmail);
+                logger.info("Roles de usuario desde el token: " + roles);
 
                 UserDetails userDetails = customUserDetailsService.loadUserById(userId);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -55,7 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
                 logger.info("Autenticación establecida en SecurityContext: " + authentication);
                 logger.info("Roles del usuario: " + authentication.getAuthorities());
             } else {
@@ -63,6 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception ex) {
             logger.error("No se pudo establecer la autenticación del usuario en el contexto de seguridad", ex);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error de autenticación: " + ex.getMessage());
         }
 
         filterChain.doFilter(request, response);
@@ -70,11 +71,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isPublicRoute(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth/") || path.equals("/api/public") || path.equals("/api/auth/signup") || path.equals("/api/auth/signup/user") || path.equals("/api/auth/signup/seller") ;
+        return path.startsWith("/api/auth/") || path.equals("/api/public") || path.equals("/api/auth/signup") || path.equals("/api/auth/signup/user") || path.equals("/api/auth/signup/seller");
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
+        logger.info("Bearer Token recibido: " + bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
