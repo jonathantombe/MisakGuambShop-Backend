@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shipments")
@@ -43,6 +43,11 @@ public class ShipmentController {
         return ResponseEntity.ok(shipmentService.updateShipment(id, shipmentDto));
     }
 
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('USER')")
+    public ResponseEntity<ShipmentDto> partialUpdateShipment(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        return ResponseEntity.ok(shipmentService.partialUpdateShipment(id, updates));
+    }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('USER')")
@@ -50,5 +55,4 @@ public class ShipmentController {
         shipmentService.deleteShipment(id);
         return ResponseEntity.noContent().build();
     }
-
 }
