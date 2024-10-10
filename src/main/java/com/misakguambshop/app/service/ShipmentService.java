@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +46,6 @@ public class ShipmentService {
         Shipment existingShipment = shipmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Shipment no encontrado con ID: " + id));
 
-
         validateStatusTransition(existingShipment.getStatus(), ShipmentStatus.fromString(shipmentDto.getStatus().name()));
 
         existingShipment.setAddress(shipmentDto.getAddress());
@@ -62,6 +64,70 @@ public class ShipmentService {
         existingShipment.setInsuranceCost(shipmentDto.getInsuranceCost());
         existingShipment.setShippingCompany(shipmentDto.getShippingCompany());
 
+        Shipment updatedShipment = shipmentRepository.save(existingShipment);
+        return convertToDto(updatedShipment);
+    }
+
+    @Transactional
+    public ShipmentDto partialUpdateShipment(Long id, Map<String, Object> updates) {
+        Shipment existingShipment = shipmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment no encontrado con ID: " + id));
+
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "address":
+                    existingShipment.setAddress((String) value);
+                    break;
+                case "recipientName":
+                    existingShipment.setRecipientName((String) value);
+                    break;
+                case "phoneNumber":
+                    existingShipment.setPhoneNumber((String) value);
+                    break;
+                case "email":
+                    existingShipment.setEmail((String) value);
+                    break;
+                case "shippingMethod":
+                    existingShipment.setShippingMethod((String) value);
+                    break;
+                case "shippingDate":
+                    existingShipment.setShippingDate(LocalDate.parse((String) value));
+                    break;
+                case "estimatedDeliveryDate":
+                    existingShipment.setEstimatedDeliveryDate(LocalDate.parse((String) value));
+                    break;
+                case "actualDeliveryDate":
+                    existingShipment.setActualDeliveryDate(value != null ? LocalDate.parse((String) value) : null);
+                    break;
+                case "country":
+                    existingShipment.setCountry((String) value);
+                    break;
+                case "city":
+                    existingShipment.setCity((String) value);
+                    break;
+                case "status":
+                    ShipmentStatus newStatus = ShipmentStatus.fromString((String) value);
+                    validateStatusTransition(existingShipment.getStatus(), newStatus);
+                    existingShipment.setStatus(newStatus);
+                    break;
+                case "weight":
+                    existingShipment.setWeight(new BigDecimal(value.toString()));
+                    break;
+                case "shippingCost":
+                    existingShipment.setShippingCost(new BigDecimal(value.toString()));
+                    break;
+                case "insuranceCost":
+                    existingShipment.setInsuranceCost(new BigDecimal(value.toString()));
+                    break;
+                case "shippingCompany":
+                    existingShipment.setShippingCompany((String) value);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Propiedad desconocida: " + key);
+            }
+        });
+
+        validateShipment(convertToDto(existingShipment));
         Shipment updatedShipment = shipmentRepository.save(existingShipment);
         return convertToDto(updatedShipment);
     }
