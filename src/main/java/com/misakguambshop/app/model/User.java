@@ -45,13 +45,19 @@ public class User {
     @Column(name = "reactivation_token")
     private String reactivationToken;
 
+    @Column(name = "is_seller")
+    private boolean isSeller = false;
+
+    @Column(name = "is_admin")
+    private boolean isAdmin;
+
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime created_at;
+    @Column(name = "createdAt", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updated_at;
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
 
     private String profileImageUrl;
 
@@ -59,6 +65,7 @@ public class User {
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+
     private Set<Role> roles = new HashSet<>();
 
     public User(String username, String email, String password, String phone) {
@@ -66,16 +73,23 @@ public class User {
         this.email = email;
         this.password = password;
         this.phone = phone;
-        this.isActive = true; // Inicializar como activo por defecto
+        this.isActive = true;
+        this.roles = roles != null ? roles : new HashSet<>();
     }
 
     public boolean getIsActive() {
         return isActive;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
+
+
 
     public String getReactivationToken() {
         return reactivationToken;
@@ -85,4 +99,26 @@ public class User {
         this.reactivationToken = reactivationToken;
     }
 
+    public boolean getIsSeller() {
+        return isSeller;
+    }
+
+    public void setIsSeller(boolean isSeller) {
+        this.isSeller = isSeller;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin || roles.stream().anyMatch(role -> role.getName() == ERole.ADMIN);
+    }
+
+    public void setIsAdmin(boolean admin) {
+        this.isAdmin = admin;
+    }
+    public void addRole(Role role) {
+        this.roles.add(role);
+    }
+
+    public void removeRole(Role role) {
+        this.roles.remove(role);
+    }
 }

@@ -1,6 +1,7 @@
 package com.misakguambshop.app.service;
 
 import com.misakguambshop.app.dto.SellerSignupDto;
+import com.misakguambshop.app.dto.UserDto;
 import com.misakguambshop.app.dto.UserLoginDto;
 import com.misakguambshop.app.dto.UserSignupDto;
 import com.misakguambshop.app.model.ERole;
@@ -42,6 +43,7 @@ public class AuthService {
     @Autowired
     private SellerRepository sellerRepository;
 
+
     public String authenticateUser(UserLoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -63,7 +65,6 @@ public class AuthService {
             throw new IllegalArgumentException("El correo electrónico ya está en uso");
         }
 
-        // Validar si las contraseñas coinciden
         if (!signUpDto.getPassword().equals(signUpDto.getConfirmPassword())) {
             throw new RuntimeException("Las contraseñas no coinciden");
         }
@@ -79,6 +80,19 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("no se encuentra el rol."));
 
         user.setRoles(Collections.singleton(role));
+        user.setIsSeller(false);
+
+        return userRepository.save(user);
+    }
+
+    public User activateAsSeller(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        user.setIsSeller(true);
+        Role sellerRole = roleRepository.findByName(ERole.SELLER)
+                .orElseThrow(() -> new RuntimeException("Rol de vendedor no encontrado"));
+        user.getRoles().add(sellerRole);
 
         return userRepository.save(user);
     }
@@ -93,10 +107,6 @@ public class AuthService {
         seller.setEmail(signUpDto.getEmail());
         seller.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
         seller.setPhone(signUpDto.getPhone());
-        seller.setCompanyName(signUpDto.getCompanyName());
-        seller.setDescription(signUpDto.getDescription());
-        seller.setCity(signUpDto.getCity());
-
         Role role = roleRepository.findByName(roleType)
                 .orElseThrow(() -> new RuntimeException("no se encuentra el rol."));
 

@@ -3,7 +3,12 @@ package com.misakguambshop.app.service;
 import com.misakguambshop.app.controller.UserController;
 import com.misakguambshop.app.dto.UserDto;
 import com.misakguambshop.app.exception.ResourceNotFoundException;
+import com.misakguambshop.app.model.ERole;
+import com.misakguambshop.app.model.Role;
+import com.misakguambshop.app.model.Seller;
 import com.misakguambshop.app.model.User;
+import com.misakguambshop.app.repository.RoleRepository;
+import com.misakguambshop.app.repository.SellerRepository;
 import com.misakguambshop.app.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -39,6 +44,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @Autowired
+    private SellerRepository sellerRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 
@@ -71,6 +82,23 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    @Transactional
+    public User activateAsSeller(Long userId) {
+        User user = getUserById(userId);
+        if (user.getIsSeller()) {
+            throw new IllegalStateException("El usuario ya es un vendedor.");
+        }
+
+        user.setIsSeller(true);
+
+        // Opcional: Agregar el rol de vendedor si se maneja con roles
+        Role sellerRole = roleRepository.findByName(ERole.SELLER)
+                .orElseThrow(() -> new RuntimeException("Rol de vendedor no encontrado"));
+        user.getRoles().add(sellerRole);
+
+        return userRepository.save(user);
+    }
+
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAllWithRoles();
@@ -88,9 +116,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
 
-        // Solo actualiza la contraseña si está presente y no vacía
         if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-            // Validar si las contraseñas coinciden antes de actualizar
             if (!userDto.isPasswordConfirmed()) {
                 throw new IllegalArgumentException("Las contraseñas no coinciden.");
             }
@@ -98,6 +124,13 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPhone(userDto.getPhone());
+
+        // Actualizar el estado de vendedor si es necesario
+        if (userDto.getIsSeller() != user.getIsSeller()) {
+            user.setIsSeller(userDto.getIsSeller());
+            // Aquí podrías manejar la lógica de roles si es necesario
+        }
+
         return userRepository.save(user);
     }
 
@@ -118,103 +151,54 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deactivateUser(Long id) {
-        User user = getUserById(id);
-        if (!user.getIsActive()) {
-            throw new IllegalArgumentException("La cuenta ya está desactivada.");
-        }
-        user.setIsActive(false);  // Cambiar el estado de la cuenta a desactivada
+    public void deactivateUser(Long id) {  // Cambiado de deactivateAccount a deactivateUser
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        user.setIsActive(false);
         userRepository.save(user);
     }
 
     @Override
-    public String requestReactivation(String email) {
+    public User reactivateAccount(String email) throws RuntimeException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("No se encontró una cuenta con ese correo electrónico."));
-
-        if (user.getIsActive()) {
-            throw new IllegalArgumentException("La cuenta ya está activa.");
-        }
-
-        // Generate a unique token
-        String token = UUID.randomUUID().toString();
-        user.setReactivationToken(token);
-        userRepository.save(user);
-
-        // Send reactivation email
-        sendReactivationEmail(user.getEmail(), token);
-
-        return "Se ha enviado un enlace de reactivación a tu correo electrónico.";
-    }
-
-    private void sendReactivationEmail(String email, String token) {
-        String reactivationUrl = "http://localhost:3000/reactivate-account?token=" + token;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("noreply@misakguambshop.com");
-        message.setTo(email);
-        message.setSubject("Reactivación de cuenta - MisakGuambShop");
-        message.setText(String.format(
-                "Estimado usuario,\n\n" +
-                        "Hemos recibido una solicitud para reactivar tu cuenta en MisakGuambShop.\n\n" +
-                        "Para reactivar tu cuenta, por favor haz clic en el siguiente enlace o cópialo y pégalo en tu navegador:\n" +
-                        "%s\n\n" +
-                        "Este enlace expirará en 24 horas por razones de seguridad.\n\n" +
-                        "Si no has solicitado la reactivación de tu cuenta, por favor ignora este correo electrónico o contacta con nuestro equipo de soporte.\n\n" +
-                        "Gracias por ser parte de la comunidad MisakGuambShop.\n\n" +
-                        "Saludos,\n" +
-                        "El equipo de MisakGuambShop",
-                reactivationUrl
-        ));
-
-        mailSender.send(message);
-    }
-
-    @Override
-    public String reactivateAccount(String token) {
-        User user = userRepository.findByReactivationToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Token de reactivación inválido."));
-
-        if (user.getIsActive()) {
-            throw new IllegalArgumentException("La cuenta ya está activa.");
-        }
-
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         user.setIsActive(true);
-        user.setReactivationToken(null);
-        userRepository.save(user);
-
-        return "Cuenta reactivada con éxito.";
+        return userRepository.save(user);
     }
+
 
     @Override
     public String forgotPassword(String email) {
+        logger.info("Iniciando proceso de olvido de contraseña para el email: {}", email);
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
+            logger.warn("Email no encontrado: {}", email);
             throw new IllegalArgumentException("El correo electrónico no está registrado.");
         }
         User user = userOptional.get();
 
-        // Generar un token único y establecer la fecha de expiración
         String token = UUID.randomUUID().toString();
-        Timestamp expirationDate = new Timestamp(System.currentTimeMillis() + 3600000); // Token expira en 1 hora
+        Timestamp expirationDate = new Timestamp(System.currentTimeMillis() + 3600000 * 24);
         user.setPasswordResetToken(token);
         user.setPasswordResetExpiration(expirationDate);
         userRepository.save(user);
+        logger.info("Token generado y guardado para el usuario: {}", user.getUsername());
 
-        // Enviar el correo electrónico al usuario con el enlace de restablecimiento
         sendPasswordResetEmail(user.getEmail(), token);
+        logger.info("Correo de restablecimiento enviado a: {}", email);
 
         return "Se ha enviado un enlace de restablecimiento de contraseña a tu correo.";
     }
 
     private void sendPasswordResetEmail(String email, String token) {
+        logger.info("Preparando correo de restablecimiento para: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + email));
 
-        String resetUrl = "http://localhost:3000/reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("noreply@misakguambshop.com");
+        message.setFrom("plantillajs@gmail.com");
         message.setTo(email);
         message.setSubject("Restablecer tu contraseña de MisakGuambShop");
         message.setText(String.format(
@@ -229,32 +213,76 @@ public class UserServiceImpl implements UserService {
                 user.getUsername(), resetUrl
         ));
 
-        mailSender.send(message);
+        try {
+            mailSender.send(message);
+            logger.info("Correo enviado exitosamente a: {}", email);
+        } catch (Exception e) {
+            logger.error("Error al enviar correo a {}: {}", email, e.getMessage());
+            throw new RuntimeException("Error al enviar el correo de restablecimiento", e);
+        }
+    }
+
+    @Override
+    public void validateResetToken(String token) {
+        logger.info("Validating reset token: {}", token);
+        User user = userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> {
+                    logger.warn("No user found for token: {}", token);
+                    return new IllegalArgumentException("El enlace de restablecimiento es inválido o ha expirado.");
+                });
+
+        if (user.getPasswordResetExpiration() == null) {
+            logger.warn("Reset expiration is null for user: {}", user.getEmail());
+            throw new IllegalArgumentException("El enlace de restablecimiento es inválido.");
+        }
+
+        if (user.getPasswordResetExpiration().before(new Timestamp(System.currentTimeMillis()))) {
+            logger.warn("Reset token expired for user: {}", user.getEmail());
+            throw new IllegalArgumentException("El enlace de restablecimiento ha expirado.");
+        }
+
+        logger.info("Reset token is valid for user: {}", user.getEmail());
+    }
+
+
+    // Método de prueba para la conexión SMTP
+    public void testSmtpConnection() {
+        try {
+            mailSender.send(new SimpleMailMessage());  // Enviamos un mensaje vacío como prueba
+            logger.info("Conexión SMTP exitosa");
+        } catch (Exception e) {
+            logger.error("Error en la conexión SMTP: ", e);
+        }
     }
 
     @Override
     public String resetPassword(String token, String newPassword) {
-        Optional<User> userOptional = userRepository.findByPasswordResetToken(token);
-        if (!userOptional.isPresent()) {
-            throw new IllegalArgumentException("El enlace de restablecimiento es inválido o ha expirado.");
-        }
-        User user = userOptional.get();
+        logger.info("Attempting to reset password with token: {}", token);
+        User user = userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> {
+                    logger.warn("Invalid reset token: {}", token);
+                    return new IllegalArgumentException("El enlace de restablecimiento es inválido o ha expirado.");
+                });
 
-        // Verificar si el token no ha expirado
         if (user.getPasswordResetExpiration().before(new Timestamp(System.currentTimeMillis()))) {
+            logger.warn("Expired reset token for user: {}", user.getEmail());
             throw new IllegalArgumentException("El enlace de restablecimiento ha expirado.");
         }
 
-        // Actualizar la contraseña del usuario
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setPasswordResetToken(null);
-        user.setPasswordResetExpiration(null);
-        userRepository.save(user);
+        try {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setPasswordResetToken(null);
+            user.setPasswordResetExpiration(null);
+            userRepository.save(user);
+            logger.info("Password reset successful for user: {}", user.getEmail());
 
-        // Enviar correo de confirmación
-        sendPasswordChangeConfirmationEmail(user.getEmail());
+            sendPasswordChangeConfirmationEmail(user.getEmail());
 
-        return "¡Contraseña actualizada correctamente!";
+            return "¡Contraseña actualizada correctamente!";
+        } catch (Exception e) {
+            logger.error("Error resetting password for user: {}", user.getEmail(), e);
+            throw new RuntimeException("Error al restablecer la contraseña. Por favor, inténtalo de nuevo más tarde.");
+        }
     }
 
     private void sendPasswordChangeConfirmationEmail(String email) {
@@ -335,14 +363,40 @@ public class UserServiceImpl implements UserService {
     public User deleteProfileImage(Long id) {
         User user = getUserById(id);
         if (user.getProfileImageUrl() != null) {
-            cloudinaryService.deleteFile(user.getProfileImageUrl());
-            logger.info("Imagen de perfil eliminada de Cloudinary");
-            user.setProfileImageUrl(null);
-            User savedUser = userRepository.save(user);
-            logger.info("URL de imagen de perfil eliminada del usuario");
-            return savedUser;
+            try {
+                cloudinaryService.deleteFile(user.getProfileImageUrl());
+                logger.info("Imagen de perfil eliminada de Cloudinary");
+                user.setProfileImageUrl(null);
+                User savedUser = userRepository.save(user);
+                logger.info("URL de imagen de perfil eliminada del usuario");
+                return savedUser;
+            } catch (Exception e) {
+                logger.error("Error al eliminar la imagen de perfil de Cloudinary", e);
+                // Incluso si hay un error al eliminar de Cloudinary, eliminamos la referencia en el usuario
+                user.setProfileImageUrl(null);
+                User savedUser = userRepository.save(user);
+                logger.info("URL de imagen de perfil eliminada del usuario a pesar del error en Cloudinary");
+                return savedUser;
+            }
+        } else {
+            logger.info("El usuario no tiene una imagen de perfil para eliminar");
+            return user; // Retornamos el usuario sin cambios
         }
-        throw new IllegalStateException("El usuario no tiene una imagen de perfil para eliminar.");
     }
 
+    @Transactional
+    public User becomeSeller(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Role sellerRole = roleRepository.findByName(ERole.SELLER)
+                .orElseThrow(() -> new RuntimeException("Rol SELLER no encontrado"));
+
+        if (!user.getRoles().contains(sellerRole)) {
+            user.getRoles().add(sellerRole);
+            user = userRepository.save(user);
+        }
+
+        return user;
+    }
 }

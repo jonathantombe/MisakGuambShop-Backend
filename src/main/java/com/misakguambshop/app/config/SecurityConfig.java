@@ -68,12 +68,24 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     //rutas autenticación
                     auth.requestMatchers(mvcMatcherBuilder.pattern("/api/auth/**")).permitAll()
-                            .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/user")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/seller")).permitAll()
 
-                            //Sellers y Users
-                            .requestMatchers(mvcMatcherBuilder.pattern("/api/sellers/**")).hasAnyRole("ADMIN", "SELLER")
-                            .requestMatchers(mvcMatcherBuilder.pattern("/api/users/**")).authenticated()
+                            //Users
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/users")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/users/{id}")).hasAnyAuthority("ADMIN", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/users/reset-password")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/request-reactivation")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/forgot-password")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/{id}/profile-image")).hasAnyAuthority("ADMIN","USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/reset-password")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/{id}")).hasAnyAuthority("ADMIN","USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/reactivate")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/{id}/profile-image")).hasAnyAuthority("ADMIN","USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/users/{id}/deactivate")).hasAnyAuthority("ADMIN", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/users/{id}/become-seller")).hasAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/users/{id}")).hasAnyAuthority("ADMIN", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/users/{id}/profile-image")).hasAnyAuthority("ADMIN", "USER")
 
                             //gestión  categorías
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
@@ -83,6 +95,8 @@ public class SecurityConfig {
 
                             //productos
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/pending")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/my-approved")).hasAnyAuthority("SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")

@@ -19,10 +19,13 @@ public interface UserService {
 
     void deactivateUser(Long id);
     String forgotPassword(String email);
-    String requestReactivation(String email);
-    String reactivateAccount(String token);
+
     String resetPassword(String token, String newPassword);
     User uploadProfileImage(Long id, MultipartFile file);
     User updateProfileImage(Long id, MultipartFile file);
     User deleteProfileImage(Long id);
+    User reactivateAccount(String email) throws RuntimeException;
+    void validateResetToken(String token);
+    User becomeSeller(Long userId);
+
 }

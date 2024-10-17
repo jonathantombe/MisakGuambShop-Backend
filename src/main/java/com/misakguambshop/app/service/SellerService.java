@@ -40,10 +40,6 @@ public class SellerService {
                     existingSeller.setFullName(sellerDetails.getFullName());
                     existingSeller.setEmail(sellerDetails.getEmail());
                     existingSeller.setPhone(sellerDetails.getPhone());
-                    existingSeller.setCompanyName(sellerDetails.getCompanyName());
-                    existingSeller.setDescription(sellerDetails.getDescription());
-                    existingSeller.setCity(sellerDetails.getCity());
-
                     if (sellerDetails.getPassword() != null && !sellerDetails.getPassword().isEmpty()) {
                         existingSeller.setPassword(passwordEncoder.encode(sellerDetails.getPassword()));
                     }
