@@ -65,27 +65,71 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers(mvcMatcherBuilder.pattern("/api/auth/**")).permitAll()
-                                .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/user")).permitAll()
-                                .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/seller")).permitAll()
-                                .requestMatchers(mvcMatcherBuilder.pattern("/api/sellers/**")).hasAnyRole("ADMIN", "SELLER")
-                                .requestMatchers(mvcMatcherBuilder.pattern("/api/users/**")).authenticated()
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/categories/**")).hasAuthority("ADMIN")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/**")).hasAuthority("ADMIN")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/categories/**")).hasAuthority("ADMIN")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
-                                 .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/orders/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/orders/**")).hasAuthority("USER")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
-                                .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
-                                .anyRequest().authenticated()
-                );
+                .authorizeHttpRequests(auth -> {
+                    //rutas autenticación
+                    auth.requestMatchers(mvcMatcherBuilder.pattern("/api/auth/**")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/auth/signup/seller")).permitAll()
+
+                            //Users
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/users")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/users/{id}")).hasAnyAuthority("ADMIN", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/users/reset-password")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/request-reactivation")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/forgot-password")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/{id}/profile-image")).hasAnyAuthority("ADMIN","USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/reset-password")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/{id}")).hasAnyAuthority("ADMIN","USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/users/reactivate")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/users/{id}/profile-image")).hasAnyAuthority("ADMIN","USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/users/{id}/deactivate")).hasAnyAuthority("ADMIN", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/users/{id}/become-seller")).hasAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/users/{id}")).hasAnyAuthority("ADMIN", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/users/{id}/profile-image")).hasAnyAuthority("ADMIN", "USER")
+
+                            //gestión  categorías
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/categories/**")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/**")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/categories/**")).hasAuthority("ADMIN")
+
+                            //productos
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/pending")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/my-approved")).hasAnyAuthority("SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+
+                            //pedidos
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/orders/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/orders/**")).hasAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
+
+
+                            //envíos
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/shipments/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/shipments/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/shipments/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+
+
+                            // detalles pedidos
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/order-details/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/order-details/**")).hasAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
+
+
+
+                            .anyRequest().authenticated();
+                });
+
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -100,7 +144,7 @@ public class SecurityConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:5173")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

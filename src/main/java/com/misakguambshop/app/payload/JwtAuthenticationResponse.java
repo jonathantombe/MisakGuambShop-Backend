@@ -1,12 +1,17 @@
 package com.misakguambshop.app.payload;
 
+import com.misakguambshop.app.dto.UserDto;
+
 public class JwtAuthenticationResponse {
     private String accessToken;
     private String tokenType = "Bearer";
+    private UserDto user;
 
-    public JwtAuthenticationResponse(String accessToken) {
+    public JwtAuthenticationResponse(String accessToken, UserDto user) {
         this.accessToken = accessToken;
+        this.user = user;
     }
+
 
     public String getAccessToken() {
         return accessToken;
@@ -22,5 +27,13 @@ public class JwtAuthenticationResponse {
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public UserDto getUser() {
+        return user;
+    }
+
+    public void setUser(UserDto user) {
+        this.user = user;
     }
 }

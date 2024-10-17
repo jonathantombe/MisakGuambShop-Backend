@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -67,6 +68,19 @@ public class OrderController {
             return ResponseEntity.noContent().build();
         } catch (ResourceNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found", e);
+        }
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<OrderDto> patchOrder(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        try {
+            OrderDto updatedOrder = orderService.patchOrder(id, updates);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (ResourceNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found", e);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid field: " + e.getMessage(), e);
         }
     }
 }

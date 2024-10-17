@@ -1,5 +1,9 @@
 package com.misakguambshop.app.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -7,7 +11,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Entity
 @Table(name = "products")
 public class Product {
@@ -17,60 +24,76 @@ public class Product {
     @Column(name = "id", columnDefinition = "INT UNSIGNED")
     private Long id;
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 100, message = "Name must be less than 100 characters")
     @Column(nullable = false, length = 100)
     private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
-    @Digits(integer = 8, fraction = 2, message = "Price can have up to 8 digits and 2 decimal places")
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"products"})
     @JoinColumn(name = "category_id", columnDefinition = "INT UNSIGNED")
     private Category category;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false, columnDefinition = "INT UNSIGNED")
-    private Seller seller;
+    @JsonIgnoreProperties({"products"})
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "BIGINT")
+    private User user;
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl;
-
-    @NotNull(message = "Stock is required")
-    @Min(value = 0, message = "Stock cannot be negative")
     @Column(nullable = false, columnDefinition = "INT UNSIGNED DEFAULT 0")
     private Integer stock;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductStatus status = ProductStatus.PENDING;
+
+    @Column(columnDefinition = "TEXT")
+    private String rejectionReason;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> images = new ArrayList<>();
+
+    public void addImage(ProductImage image) {
+        images.add(image);
+        image.setProduct(this);
+    }
+
+    public List<ProductImage> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductImage> images) {
+        this.images = images;
+    }
+
     @CreationTimestamp
-    @Column(name = "creation_date", nullable = false, updatable = false)
-    private LocalDateTime creationDate;
+    @Column(name = "createdAt", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "update_date")
-    private LocalDateTime updateDate;
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
 
     // Constructor sin parámetros
     public Product() {
     }
 
     // Constructor con todos los parámetros
-    public Product(Long id, String name, String description, BigDecimal price, Category category, Seller seller, String imageUrl, Integer stock, LocalDateTime creationDate, LocalDateTime updateDate) {
+    public Product(Long id, String name, String description, BigDecimal price, Category category, User user, Integer stock, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.category = category;
-        this.seller = seller;
-        this.imageUrl = imageUrl;
+        this.user = user;
         this.stock = stock;
-        this.creationDate = creationDate;
-        this.updateDate = updateDate;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getters y Setters
@@ -114,21 +137,6 @@ public class Product {
         this.category = category;
     }
 
-    public Seller getSeller() {
-        return seller;
-    }
-
-    public void setSeller(Seller seller) {
-        this.seller = seller;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 
     public Integer getStock() {
         return stock;
@@ -138,20 +146,43 @@ public class Product {
         this.stock = stock;
     }
 
-    public LocalDateTime getCreationDate() {
-        return creationDate;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
+    public void setCreatedAt(LocalDateTime creationDate) {
+        this.createdAt = creationDate;
     }
 
-    public LocalDateTime getUpdateDate() {
-        return updateDate;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdateDate(LocalDateTime updateDate) {
-        this.updateDate = updateDate;
+    public void setUpdatedAt(LocalDateTime updateDate) {
+        this.updatedAt = updateDate;
+    }
+
+    public  ProductStatus getStatus(){
+        return status;
+    }
+    public void setStatus(ProductStatus productStatus) {
+        this.status = productStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
 

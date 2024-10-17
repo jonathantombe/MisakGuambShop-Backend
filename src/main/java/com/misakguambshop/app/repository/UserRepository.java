@@ -21,4 +21,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.roles")
     List<User> findAllWithRoles();
+
+    Optional<User> findByReactivationToken(String token);
+
+    Optional<User> findByPasswordResetToken(String token);
+
+    Optional<User> findByEmailIgnoreCase(String email);
 }

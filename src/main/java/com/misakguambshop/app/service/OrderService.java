@@ -3,6 +3,7 @@ package com.misakguambshop.app.service;
 import com.misakguambshop.app.dto.OrderDto;
 import com.misakguambshop.app.exception.ResourceNotFoundException;
 import com.misakguambshop.app.model.Order;
+import com.misakguambshop.app.model.OrderStatus;
 import com.misakguambshop.app.model.User;
 import com.misakguambshop.app.repository.OrderRepository;
 import com.misakguambshop.app.repository.UserRepository;
@@ -10,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,6 +77,46 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         orderRepository.delete(order);
+    }
+
+    @Transactional
+    public OrderDto patchOrder(Long id, Map<String, Object> updates) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "orderDate":
+                    if (value != null) {
+                        order.setOrderDate(LocalDateTime.parse(value.toString()));
+                    }
+                    break;
+                case "status":
+                    if (value != null) {
+                        try {
+                            order.setStatus(OrderStatus.forValue(value.toString()));
+                        } catch (IllegalArgumentException e) {
+                            throw new IllegalArgumentException("Invalid value for status: " + value, e);
+                        }
+                    }
+                    break;
+                case "paymentMethod":
+                    if (value != null) {
+                        order.setPaymentMethod(value.toString());
+                    }
+                    break;
+                case "totalAmount":
+                    if (value != null) {
+                        order.setTotalAmount(new BigDecimal(value.toString()));
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid field: " + key);
+            }
+        });
+
+        Order updatedOrder = orderRepository.save(order);
+        return convertToDto(updatedOrder);
     }
 
     private OrderDto convertToDto(Order order) {

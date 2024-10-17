@@ -1,110 +1,81 @@
 package com.misakguambshop.app.dto;
 
 import com.misakguambshop.app.model.Category;
+import com.misakguambshop.app.model.ProductStatus;
 import com.misakguambshop.app.model.Seller;
 import jakarta.validation.constraints.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173")
 public class ProductDto {
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 100, message = "Name must be less than 100 characters")
+    private Long id;
+
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 100, message = "El nombre debe tener menos de 100 caracteres")
     private String name;
 
+    @Size(max = 500, message = "La descripción debe tener menos de 500 caracteres")
     private String description;
 
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
-    @Digits(integer = 10, fraction = 2, message = "Price can have up to 10 digits and 2 decimal places")
+    @NotNull(message = "El precio es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor que cero")
+    @Digits(integer = 10, fraction = 2, message = "El precio puede tener hasta 10 dígitos y 2 decimales")
     private BigDecimal price;
 
-    private Long categoryId;  // Este campo existe pero no tiene getters ni setters
+    @NotNull(message = "El ID de la categoría es obligatorio")
+    private Long categoryId;
 
-    @NotNull(message = "Seller ID is required")
-    private Long sellerId;  // Este campo existe pero no tiene getters ni setters
+    @NotNull(message = "El ID del usuario es obligatorio")
+    private Long userId;
 
-    private String imageUrl;
-
-    @NotNull(message = "Stock is required")
-    @Min(value = 0, message = "Stock cannot be negative")
+    @NotNull(message = "El stock es obligatorio")
+    @Min(value = 0, message = "El stock no puede ser negativo")
     private Integer stock;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime updateDate;
+    private ProductStatus status;
+    private String rejectionReason;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private List<String> imageUrls;
 
-    // Agregamos los getters y setters que faltaban
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getCategoryId() {
-        return categoryId;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public Long getSellerId() {
-        return sellerId;
-    }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
-    public void setSellerId(Long sellerId) {
-        this.sellerId = sellerId;
-    }
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
-    // Ya tienes implementados estos:
-    public String getName() {
-        return name;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public Integer getStock() { return stock; }
+    public void setStock(Integer stock) { this.stock = stock; }
 
-    public String getDescription() {
-        return description;
-    }
+    public ProductStatus getStatus() { return status; }
+    public void setStatus(ProductStatus status) { this.status = status; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public LocalDateTime getUpdateDate() {
-        return updateDate;
-    }
-
-    public void setUpdateDate(LocalDateTime updateDate) {
-        this.updateDate = updateDate;
-    }
+    public List<String> getImageUrls() { return imageUrls; }
+    public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
 }
