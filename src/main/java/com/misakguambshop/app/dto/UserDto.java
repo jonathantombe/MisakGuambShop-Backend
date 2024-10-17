@@ -1,16 +1,24 @@
 package com.misakguambshop.app.dto;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserDto {
+
+    private Long id;
+
     @NotBlank(message = "El nombre de usuario es obligatorio.")
     @Size(min = 3, max = 20, message = "El nombre de usuario debe tener entre 3 y 20 caracteres.")
     @Pattern(regexp = "^[a-zA-Z0-9 ]+$", message = "El nombre de usuario solo puede contener letras y números.")
@@ -43,10 +51,17 @@ public class UserDto {
     @Size(max = 255, message = "La URL de la imagen de perfil no debe exceder los 255 caracteres")
     private String profileImageUrl;
 
+    private boolean isSeller;
+
+    private boolean isAdmin;
+
     private boolean isActive = true;
 
-    private LocalDateTime creationDate;
-    private LocalDateTime updateDate;
+    private String role;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     public boolean isPasswordConfirmed() {
         return this.password != null && this.password.equals(this.confirmPassword);
@@ -59,7 +74,9 @@ public class UserDto {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
-     
+
+    private List<String> roles;
+
     public boolean isValidProfileImage() throws IOException {
         if (profileImage == null || profileImage.isEmpty()) {
             return false; // La imagen es obligatoria
@@ -90,4 +107,19 @@ public class UserDto {
         return true;
     }
 
+    public boolean getIsSeller() {
+        return isSeller;
+    }
+
+    public void setIsSeller(boolean isSeller) {
+        this.isSeller = isSeller;
+    }
+
+    public boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 }

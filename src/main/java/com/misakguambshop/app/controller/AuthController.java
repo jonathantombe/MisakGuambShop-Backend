@@ -1,6 +1,7 @@
 package com.misakguambshop.app.controller;
 
 import com.misakguambshop.app.dto.SellerSignupDto;
+import com.misakguambshop.app.dto.UserDto;
 import com.misakguambshop.app.dto.UserLoginDto;
 import com.misakguambshop.app.dto.UserSignupDto;
 import com.misakguambshop.app.model.ERole;
@@ -15,14 +16,22 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -46,7 +55,7 @@ public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    @PostMapping("/signup/user")
+    @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserSignupDto signUpDto) {
         try {
             User user = authService.registerUser(signUpDto, ERole.USER);
@@ -55,6 +64,17 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error al registrar al usuario: ", e);
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/activate-seller")
+    public ResponseEntity<?> activateAsSeller(@RequestParam Long userId) {
+        try {
+            User updatedUser = authService.activateAsSeller(userId);
+            return ResponseEntity.ok("Usuario activado como vendedor exitosamente");
+        } catch (Exception e) {
+            logger.error("Error al activar al usuario como vendedor: ", e);
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
@@ -85,14 +105,39 @@ public class AuthController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            User user = userRepository.findByEmailWithRoles(loginDto.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + loginDto.getEmail()));
+
+            if (!user.getIsActive()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "La cuenta está desactivada", "status", "account_deactivated"));
+            }
+
             String jwt = tokenProvider.generateToken(authentication);
-            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setUsername(user.getUsername());
+            userDto.setEmail(user.getEmail());
+            userDto.setPhone(user.getPhone());
+            userDto.setIsActive(user.getIsActive());
+            userDto.setIsAdmin(user.isAdmin());
+            userDto.setIsSeller(user.getIsSeller());
+            userDto.setProfileImageUrl(user.getProfileImageUrl());
+
+            // Mapear los roles
+            Set<String> roles = user.getRoles().stream()
+                    .map(role -> role.getName().name())
+                    .collect(Collectors.toSet());
+            userDto.setRoles(new ArrayList<>(roles));
+
+            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, userDto));
         } catch (BadCredentialsException e) {
-            logger.error("Error durante la autenticación: Credenciales incorrectas", e);
-            return ResponseEntity.badRequest().body("Las credenciales ingresadas no son correctas. Por favor, verifica tu correo electrónico y contraseña..");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Las credenciales ingresadas no son correctas.");
         } catch (Exception e) {
-            logger.error("Error inesperado durante la autenticación: ", e);
-            return ResponseEntity.badRequest().body("Error de autenticación: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error de autenticación: " + e.getMessage());
         }
     }
 }

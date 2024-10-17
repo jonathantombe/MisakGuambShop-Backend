@@ -53,7 +53,7 @@ public class AuthControllerTest {
         signupDto.setPassword("password");
         signupDto.setPhone("1234567890");
 
-        mockMvc.perform(post("/api/auth/signup/user")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupDto)))
                 .andExpect(status().isOk());

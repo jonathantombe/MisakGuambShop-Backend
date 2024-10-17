@@ -50,11 +50,13 @@ public class DataInitializer implements CommandLineRunner {
             User admin = new User();
             admin.setUsername("admin");
             admin.setEmail("admin@gmail.com");
-            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setPassword(passwordEncoder.encode("Admin123!"));
             admin.setPhone("1234567890");
             admin.setRoles(new HashSet<>(Arrays.asList(adminRole)));
+            admin.setIsAdmin(true);
 
-            userRepository.save(admin);
+            User savedAdmin = userRepository.save(admin);
+            System.out.println("Admin user created with isAdmin: " + savedAdmin.isAdmin());
         }
     }
 }
