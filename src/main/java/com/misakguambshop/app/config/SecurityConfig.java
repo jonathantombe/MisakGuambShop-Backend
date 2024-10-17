@@ -75,7 +75,7 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/sellers/**")).hasAnyRole("ADMIN", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/users/**")).authenticated()
 
-                            //gestión de categorías
+                            //gestión  categorías
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/categories/**")).hasAuthority("ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/**")).hasAuthority("ADMIN")
@@ -102,6 +102,15 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/shipments/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+
+
+                            // detalles pedidos
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/order-details/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/order-details/**")).hasAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
+
 
 
                             .anyRequest().authenticated();
