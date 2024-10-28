@@ -20,7 +20,6 @@ public class UserLoginDto {
             message = "La contraseña debe tener al menos una mayúscula, una minúscula, un número y un carácter especial.")
     private String password;
 
-    // Constructor
     public UserLoginDto() {}
 
     public UserLoginDto(String email, String password) {
@@ -28,7 +27,6 @@ public class UserLoginDto {
         this.password = password;
     }
 
-    // Getters y Setters
     public String getEmail() {
         return email;
     }

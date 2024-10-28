@@ -97,8 +97,9 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/pending")).hasAuthority("ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/my-approved")).hasAnyAuthority("SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/my-products")).hasAnyAuthority("SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/products/{id}")).hasAnyAuthority("ADMIN", "USER", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
 
@@ -117,6 +118,21 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
 
+                            //pagos
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/payments")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/payments/{id}")).hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/payments")).hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/payments/{id}")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/payments/{id}")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/payments/**")).hasAuthority("ADMIN")
+
+                            //UserPaymentMethod
+                            .requestMatchers(HttpMethod.GET, "/api/user-payment-methods").hasAuthority("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/user-payment-methods/{id}").hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(HttpMethod.GET, "/api/user-payment-methods/user/{userId}").hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(HttpMethod.POST, "/api/user-payment-methods").hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(HttpMethod.PUT, "/api/user-payment-methods/{id}").hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/api/user-payment-methods/{id}").hasAuthority("ADMIN")
 
                             // detalles pedidos
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/order-details/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
@@ -124,8 +140,6 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
-
-
 
                             .anyRequest().authenticated();
                 });

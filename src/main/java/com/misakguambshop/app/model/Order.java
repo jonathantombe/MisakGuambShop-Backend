@@ -23,11 +23,15 @@ public class Order {
     @Column(name = "status", nullable = false)
     private OrderStatus status;
 
-    @Column(name = "payment_method")
-    private String paymentMethod;
-
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false)
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "payment_reference")
+    private String paymentReference;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -77,16 +81,23 @@ public class Order {
         this.status = status;
     }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
     public BigDecimal getTotalAmount() {
         return totalAmount;
+    }
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
     }
 
     public void setTotalAmount(BigDecimal totalAmount) {

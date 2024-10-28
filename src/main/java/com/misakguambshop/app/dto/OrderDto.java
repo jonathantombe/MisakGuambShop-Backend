@@ -2,6 +2,7 @@ package com.misakguambshop.app.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.misakguambshop.app.model.OrderStatus;
+import com.misakguambshop.app.model.PaymentStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -22,23 +23,25 @@ public class OrderDto {
     @NotNull
     private OrderStatus status;
 
-    private String paymentMethod;
-
     @NotNull
     @Positive
     private BigDecimal totalAmount;
+
+    @NotNull
+    private PaymentStatus paymentStatus;
+
+    private String paymentReference;
 
 
     public OrderDto() {
     }
 
 
-    public OrderDto(Long id, Long userId, LocalDateTime orderDate, OrderStatus status, String paymentMethod, BigDecimal totalAmount) {
+    public OrderDto(Long id, Long userId, LocalDateTime orderDate, OrderStatus status, BigDecimal totalAmount) {
         this.id = id;
         this.userId = userId;
         this.orderDate = orderDate;
         this.status = status;
-        this.paymentMethod = paymentMethod;
         this.totalAmount = totalAmount;
     }
 
@@ -75,20 +78,28 @@ public class OrderDto {
         this.status = status;
     }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
     public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
     public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
     }
 
     @Override
@@ -98,7 +109,6 @@ public class OrderDto {
                 ", userId=" + userId +
                 ", orderDate=" + orderDate +
                 ", status=" + status +
-                ", paymentMethod='" + paymentMethod + '\'' +
                 ", totalAmount=" + totalAmount +
                 '}';
     }
