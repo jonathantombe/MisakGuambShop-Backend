@@ -4,6 +4,7 @@ import com.misakguambshop.app.dto.OrderDto;
 import com.misakguambshop.app.exception.ResourceNotFoundException;
 import com.misakguambshop.app.model.Order;
 import com.misakguambshop.app.model.OrderStatus;
+import com.misakguambshop.app.model.PaymentStatus;
 import com.misakguambshop.app.model.User;
 import com.misakguambshop.app.repository.OrderRepository;
 import com.misakguambshop.app.repository.UserRepository;
@@ -48,9 +49,9 @@ public class OrderService {
         order.setUser(user);
         order.setOrderDate(orderDto.getOrderDate() != null ? orderDto.getOrderDate() : LocalDateTime.now());
         order.setStatus(orderDto.getStatus());
-        order.setPaymentMethod(orderDto.getPaymentMethod());
+        order.setPaymentStatus(orderDto.getPaymentStatus());
+        order.setPaymentReference(orderDto.getPaymentReference());
         order.setTotalAmount(orderDto.getTotalAmount());
-
         Order savedOrder = orderRepository.save(order);
         return convertToDto(savedOrder);
     }
@@ -65,7 +66,8 @@ public class OrderService {
         }
 
         order.setStatus(orderDto.getStatus());
-        order.setPaymentMethod(orderDto.getPaymentMethod());
+        order.setPaymentStatus(orderDto.getPaymentStatus());
+        order.setPaymentReference(orderDto.getPaymentReference());
         order.setTotalAmount(orderDto.getTotalAmount());
 
         Order updatedOrder = orderRepository.save(order);
@@ -100,10 +102,13 @@ public class OrderService {
                         }
                     }
                     break;
-                case "paymentMethod":
+                case "paymentStatus":
                     if (value != null) {
-                        order.setPaymentMethod(value.toString());
+                        order.setPaymentStatus(PaymentStatus.valueOf(value.toString()));
                     }
+                    break;
+                case "paymentReference":
+                    order.setPaymentReference(value != null ? value.toString() : null);
                     break;
                 case "totalAmount":
                     if (value != null) {
@@ -125,7 +130,8 @@ public class OrderService {
         dto.setUserId(order.getUser().getId());
         dto.setOrderDate(order.getOrderDate());
         dto.setStatus(order.getStatus());
-        dto.setPaymentMethod(order.getPaymentMethod());
+        dto.setPaymentStatus(order.getPaymentStatus());
+        dto.setPaymentReference(order.getPaymentReference());
         dto.setTotalAmount(order.getTotalAmount());
         return dto;
     }

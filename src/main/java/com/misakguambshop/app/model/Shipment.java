@@ -1,9 +1,10 @@
 package com.misakguambshop.app.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "shipments")
@@ -11,59 +12,62 @@ public class Shipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    @NotNull(message = "El ID del pedido es obligatorio")
+    @Column(name = "order_id", nullable = false)
     private Long orderId;
 
-    @NotBlank(message = "La dirección es obligatoria")
-    @Size(min = 10, max = 255, message = "La dirección debe tener entre 10 y 255 caracteres")
+    @Column(name = "address", nullable = false)
     private String address;
 
-    @NotBlank(message = "El nombre del destinatario es obligatorio")
-    @Pattern(regexp = "^[a-zA-Z\\sáéíóúÁÉÍÓÚñÑ]+$", message = "El nombre solo puede contener letras, espacios y caracteres especiales")
+    @Column(name = "recipient_name", nullable = false)
     private String recipientName;
 
-    @NotBlank(message = "El número de teléfono es obligatorio")
-    @Pattern(regexp = "^(\\+\\d{1,3})?[\\d\\s-]{7,15}$", message = "El número de teléfono debe ser válido y contener entre 7 y 15 caracteres")
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Email(message = "El correo electrónico no tiene un formato válido")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @NotBlank(message = "El método de envío es obligatorio")
-    private String shippingMethod;
+    @Column(name = "department", nullable = false)
+    private String department;
 
-    @NotNull(message = "La fecha de envío es obligatoria")
-    private LocalDate shippingDate;
-
-    @NotNull(message = "La fecha de entrega estimada es obligatoria")
-    private LocalDate estimatedDeliveryDate;
-
-    private LocalDate actualDeliveryDate;
-
-    @NotBlank(message = "El país es obligatorio")
-    private String country;
-
-    @NotBlank(message = "La ciudad es obligatoria")
+    @Column(name = "city", nullable = false)
     private String city;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "El estado del envío es obligatorio")
-    private ShipmentStatus status;
+    @Column(name = "neighborhood")
+    private String neighborhood;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "El peso debe ser mayor a 0")
-    private BigDecimal weight;
+    @Column(name = "postal_code", nullable = false)
+    private String postalCode;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "El costo de envío debe ser mayor a 0")
-    private BigDecimal shippingCost;
+    @Column(name = "shipping_notes")
+    private String shippingNotes;
 
-    private BigDecimal insuranceCost;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @NotBlank(message = "El nombre de la empresa de envío es obligatorio")
-    private String shippingCompany;
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    // Getters y Setters
+    public Shipment() {
+    }
+
+    public Shipment(Long orderId, String address, String recipientName, String phoneNumber,
+                    String email, String department, String city, String postalCode) {
+        this.orderId = orderId;
+        this.address = address;
+        this.recipientName = recipientName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.department = department;
+        this.city = city;
+        this.postalCode = postalCode;
+    }
+
     public Long getId() {
         return id;
     }
@@ -112,44 +116,12 @@ public class Shipment {
         this.email = email;
     }
 
-    public String getShippingMethod() {
-        return shippingMethod;
+    public String getDepartment() {
+        return department;
     }
 
-    public void setShippingMethod(String shippingMethod) {
-        this.shippingMethod = shippingMethod;
-    }
-
-    public LocalDate getShippingDate() {
-        return shippingDate;
-    }
-
-    public void setShippingDate(LocalDate shippingDate) {
-        this.shippingDate = shippingDate;
-    }
-
-    public LocalDate getEstimatedDeliveryDate() {
-        return estimatedDeliveryDate;
-    }
-
-    public void setEstimatedDeliveryDate(LocalDate estimatedDeliveryDate) {
-        this.estimatedDeliveryDate = estimatedDeliveryDate;
-    }
-
-    public LocalDate getActualDeliveryDate() {
-        return actualDeliveryDate;
-    }
-
-    public void setActualDeliveryDate(LocalDate actualDeliveryDate) {
-        this.actualDeliveryDate = actualDeliveryDate;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
+    public void setDepartment(String department) {
+        this.department = department;
     }
 
     public String getCity() {
@@ -160,43 +132,48 @@ public class Shipment {
         this.city = city;
     }
 
-    public ShipmentStatus getStatus() {
-        return status;
+    public String getNeighborhood() {
+        return neighborhood;
     }
 
-    public void setStatus(ShipmentStatus status) {
-        this.status = status;
+    public void setNeighborhood(String neighborhood) {
+        this.neighborhood = neighborhood;
     }
 
-    public BigDecimal getWeight() {
-        return weight;
+    public String getPostalCode() {
+        return postalCode;
     }
 
-    public void setWeight(BigDecimal weight) {
-        this.weight = weight;
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
     }
 
-    public BigDecimal getShippingCost() {
-        return shippingCost;
+    public String getShippingNotes() {
+        return shippingNotes;
     }
 
-    public void setShippingCost(BigDecimal shippingCost) {
-        this.shippingCost = shippingCost;
+    public void setShippingNotes(String shippingNotes) {
+        this.shippingNotes = shippingNotes;
     }
 
-    public BigDecimal getInsuranceCost() {
-        return insuranceCost;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setInsuranceCost(BigDecimal insuranceCost) {
-        this.insuranceCost = insuranceCost;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public String getShippingCompany() {
-        return shippingCompany;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public void setShippingCompany(String shippingCompany) {
-        this.shippingCompany = shippingCompany;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
+
+
+
+
+
