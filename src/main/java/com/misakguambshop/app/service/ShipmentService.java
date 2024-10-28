@@ -36,7 +36,6 @@ public class ShipmentService {
     public ShipmentDto createShipment(ShipmentDto shipmentDto) {
         validateShipment(shipmentDto);
         Shipment shipment = convertToEntity(shipmentDto);
-        shipment.setStatus(ShipmentStatus.fromString(shipmentDto.getStatus().name()));
         Shipment savedShipment = shipmentRepository.save(shipment);
         return convertToDto(savedShipment);
     }
@@ -46,23 +45,15 @@ public class ShipmentService {
         Shipment existingShipment = shipmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Shipment no encontrado con ID: " + id));
 
-        validateStatusTransition(existingShipment.getStatus(), ShipmentStatus.fromString(shipmentDto.getStatus().name()));
-
         existingShipment.setAddress(shipmentDto.getAddress());
         existingShipment.setRecipientName(shipmentDto.getRecipientName());
         existingShipment.setPhoneNumber(shipmentDto.getPhoneNumber());
         existingShipment.setEmail(shipmentDto.getEmail());
-        existingShipment.setShippingMethod(shipmentDto.getShippingMethod());
-        existingShipment.setShippingDate(shipmentDto.getShippingDate());
-        existingShipment.setEstimatedDeliveryDate(shipmentDto.getEstimatedDeliveryDate());
-        existingShipment.setActualDeliveryDate(shipmentDto.getActualDeliveryDate());
-        existingShipment.setCountry(shipmentDto.getCountry());
+        existingShipment.setDepartment(shipmentDto.getDepartment());
         existingShipment.setCity(shipmentDto.getCity());
-        existingShipment.setStatus(ShipmentStatus.fromString(shipmentDto.getStatus().name()));
-        existingShipment.setWeight(shipmentDto.getWeight());
-        existingShipment.setShippingCost(shipmentDto.getShippingCost());
-        existingShipment.setInsuranceCost(shipmentDto.getInsuranceCost());
-        existingShipment.setShippingCompany(shipmentDto.getShippingCompany());
+        existingShipment.setNeighborhood(shipmentDto.getNeighborhood());
+        existingShipment.setPostalCode(shipmentDto.getPostalCode());
+        existingShipment.setShippingNotes(shipmentDto.getShippingNotes());
 
         Shipment updatedShipment = shipmentRepository.save(existingShipment);
         return convertToDto(updatedShipment);
@@ -87,40 +78,20 @@ public class ShipmentService {
                 case "email":
                     existingShipment.setEmail((String) value);
                     break;
-                case "shippingMethod":
-                    existingShipment.setShippingMethod((String) value);
-                    break;
-                case "shippingDate":
-                    existingShipment.setShippingDate(LocalDate.parse((String) value));
-                    break;
-                case "estimatedDeliveryDate":
-                    existingShipment.setEstimatedDeliveryDate(LocalDate.parse((String) value));
-                    break;
-                case "actualDeliveryDate":
-                    existingShipment.setActualDeliveryDate(value != null ? LocalDate.parse((String) value) : null);
-                    break;
-                case "country":
-                    existingShipment.setCountry((String) value);
+                case "department":
+                    existingShipment.setDepartment((String) value);
                     break;
                 case "city":
                     existingShipment.setCity((String) value);
                     break;
-                case "status":
-                    ShipmentStatus newStatus = ShipmentStatus.fromString((String) value);
-                    validateStatusTransition(existingShipment.getStatus(), newStatus);
-                    existingShipment.setStatus(newStatus);
+                case "neighborhood":
+                    existingShipment.setNeighborhood((String) value);
                     break;
-                case "weight":
-                    existingShipment.setWeight(new BigDecimal(value.toString()));
+                case "postalCode":
+                    existingShipment.setPostalCode((String) value);
                     break;
-                case "shippingCost":
-                    existingShipment.setShippingCost(new BigDecimal(value.toString()));
-                    break;
-                case "insuranceCost":
-                    existingShipment.setInsuranceCost(new BigDecimal(value.toString()));
-                    break;
-                case "shippingCompany":
-                    existingShipment.setShippingCompany((String) value);
+                case "shippingNotes":
+                    existingShipment.setShippingNotes((String) value);
                     break;
                 default:
                     throw new IllegalArgumentException("Propiedad desconocida: " + key);
@@ -140,25 +111,11 @@ public class ShipmentService {
     }
 
     private void validateShipment(ShipmentDto shipmentDto) {
-        if (!isCityValidForCountry(shipmentDto.getCity(), shipmentDto.getCountry())) {
-            throw new IllegalArgumentException("La ciudad no es válida para el país seleccionado.");
-        }
-        if (shipmentDto.getEstimatedDeliveryDate().isBefore(shipmentDto.getShippingDate())) {
-            throw new IllegalArgumentException("La fecha de entrega estimada no puede ser anterior a la fecha de envío.");
-        }
-    }
-
-    private boolean isCityValidForCountry(String city, String country) {
-        return country.equalsIgnoreCase("Colombia") && (city.equalsIgnoreCase("Bogotá") || city.equalsIgnoreCase("Cali"));
+        // Validaciones de envío
     }
 
     private void validateStatusTransition(ShipmentStatus currentStatus, ShipmentStatus newStatus) {
-        if (currentStatus.equals(ShipmentStatus.PENDING) && newStatus.equals(ShipmentStatus.DELIVERED)) {
-            throw new IllegalArgumentException("No se puede pasar de 'PENDING' a 'DELIVERED' directamente.");
-        }
-        if (currentStatus.equals(ShipmentStatus.RETURNED)) {
-            throw new IllegalArgumentException("Un envío devuelto no puede cambiar de estado.");
-        }
+        // Validaciones de transición de estado
     }
 
     private ShipmentDto convertToDto(Shipment shipment) {
@@ -169,17 +126,13 @@ public class ShipmentService {
         shipmentDto.setRecipientName(shipment.getRecipientName());
         shipmentDto.setPhoneNumber(shipment.getPhoneNumber());
         shipmentDto.setEmail(shipment.getEmail());
-        shipmentDto.setShippingMethod(shipment.getShippingMethod());
-        shipmentDto.setShippingDate(shipment.getShippingDate());
-        shipmentDto.setEstimatedDeliveryDate(shipment.getEstimatedDeliveryDate());
-        shipmentDto.setActualDeliveryDate(shipment.getActualDeliveryDate());
-        shipmentDto.setCountry(shipment.getCountry());
+        shipmentDto.setDepartment(shipment.getDepartment());
         shipmentDto.setCity(shipment.getCity());
-        shipmentDto.setStatus(shipment.getStatus());
-        shipmentDto.setWeight(shipment.getWeight());
-        shipmentDto.setShippingCost(shipment.getShippingCost());
-        shipmentDto.setInsuranceCost(shipment.getInsuranceCost());
-        shipmentDto.setShippingCompany(shipment.getShippingCompany());
+        shipmentDto.setNeighborhood(shipment.getNeighborhood());
+        shipmentDto.setPostalCode(shipment.getPostalCode());
+        shipmentDto.setShippingNotes(shipment.getShippingNotes());
+        shipmentDto.setCreatedAt(shipment.getCreatedAt());
+        shipmentDto.setUpdatedAt(shipment.getUpdatedAt());
         return shipmentDto;
     }
 
@@ -190,17 +143,13 @@ public class ShipmentService {
         shipment.setRecipientName(shipmentDto.getRecipientName());
         shipment.setPhoneNumber(shipmentDto.getPhoneNumber());
         shipment.setEmail(shipmentDto.getEmail());
-        shipment.setShippingMethod(shipmentDto.getShippingMethod());
-        shipment.setShippingDate(shipmentDto.getShippingDate());
-        shipment.setEstimatedDeliveryDate(shipmentDto.getEstimatedDeliveryDate());
-        shipment.setActualDeliveryDate(shipmentDto.getActualDeliveryDate());
-        shipment.setCountry(shipmentDto.getCountry());
+        shipment.setDepartment(shipmentDto.getDepartment());
         shipment.setCity(shipmentDto.getCity());
-        shipment.setStatus(ShipmentStatus.fromString(shipmentDto.getStatus().name()));
-        shipment.setWeight(shipmentDto.getWeight());
-        shipment.setShippingCost(shipmentDto.getShippingCost());
-        shipment.setInsuranceCost(shipmentDto.getInsuranceCost());
-        shipment.setShippingCompany(shipmentDto.getShippingCompany());
+        shipment.setNeighborhood(shipmentDto.getNeighborhood());
+        shipment.setPostalCode(shipmentDto.getPostalCode());
+        shipment.setShippingNotes(shipmentDto.getShippingNotes());
         return shipment;
     }
 }
+
+

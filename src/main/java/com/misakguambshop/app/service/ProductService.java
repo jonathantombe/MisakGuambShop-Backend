@@ -69,6 +69,10 @@ public class ProductService {
         return productRepository.findByUserIdAndStatus(userId, ProductStatus.APPROVED);
     }
 
+    public List<Product> getProductsByUserId(Long userId) {
+        return productRepository.findByUserId(userId);
+    }
+
     @Transactional
     public Product createProduct(ProductDto productDto, List<MultipartFile> images) {
         User user = userRepository.findById(productDto.getUserId())
