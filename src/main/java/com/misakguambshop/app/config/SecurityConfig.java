@@ -125,6 +125,12 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
 
+                            //reviews
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/reviews/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/reviews/**")).hasAnyAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/reviews/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/reviews/**")).hasAnyAuthority("USER", "ADMIN")
+
 
 
                             .anyRequest().authenticated();
