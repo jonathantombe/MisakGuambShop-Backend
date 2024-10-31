@@ -1,5 +1,6 @@
 package com.misakguambshop.app.controller;
 
+
 import com.misakguambshop.app.dto.ShipmentDto;
 import com.misakguambshop.app.service.ShipmentService;
 import jakarta.validation.Valid;
@@ -9,50 +10,84 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shipments")
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class ShipmentController {
 
+    private final ShipmentService shipmentService;
+
     @Autowired
-    private ShipmentService shipmentService;
+    public ShipmentController(ShipmentService shipmentService) {
+        this.shipmentService = shipmentService;
+    }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('USER')")
-    public ResponseEntity<List<ShipmentDto>> getAllShipments() {
-        return ResponseEntity.ok(shipmentService.getAllShipments());
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER')")
+    public ResponseEntity<Map<String, Object>> getAllShipments() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", shipmentService.getAllShipments());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<ShipmentDto> getShipmentById(@PathVariable Long id) {
-        return ResponseEntity.ok(shipmentService.getShipmentById(id));
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<Map<String, Object>> getShipmentById(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", shipmentService.getShipmentById(id));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('USER')")
-    public ResponseEntity<ShipmentDto> createShipment(@Valid @RequestBody ShipmentDto shipmentDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(shipmentService.createShipment(shipmentDto));
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<Map<String, Object>> createShipment(@Valid @RequestBody ShipmentDto shipmentDto) {
+        ShipmentDto createdShipment = shipmentService.createShipment(shipmentDto);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Dirección guardada exitosamente");
+        response.put("data", createdShipment);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('USER')")
-    public ResponseEntity<ShipmentDto> updateShipment(@PathVariable Long id, @Valid @RequestBody ShipmentDto shipmentDto) {
-        return ResponseEntity.ok(shipmentService.updateShipment(id, shipmentDto));
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<Map<String, Object>> updateShipment(
+            @PathVariable Long id,
+            @Valid @RequestBody ShipmentDto shipmentDto) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Dirección actualizada exitosamente");
+        response.put("data", shipmentService.updateShipment(id, shipmentDto));
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('USER')")
-    public ResponseEntity<ShipmentDto> partialUpdateShipment(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        return ResponseEntity.ok(shipmentService.partialUpdateShipment(id, updates));
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<Map<String, Object>> partialUpdateShipment(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Dirección actualizada parcialmente");
+        response.put("data", shipmentService.partialUpdateShipment(id, updates));
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('USER')")
-    public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER')")
+    public ResponseEntity<Map<String, Object>> deleteShipment(@PathVariable Long id) {
         shipmentService.deleteShipment(id);
-        return ResponseEntity.noContent().build();
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Dirección eliminada exitosamente");
+        return ResponseEntity.ok(response);
     }
 }

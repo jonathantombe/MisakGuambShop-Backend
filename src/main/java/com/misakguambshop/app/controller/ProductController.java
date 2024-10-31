@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class ProductController {
 
     private final ProductService productService;
@@ -61,6 +61,19 @@ public class ProductController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER', 'USER')")
     public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(productService.getProductsByCategory(categoryId));
+    }
+
+    @GetMapping("/my-products")
+    @PreAuthorize("hasAnyAuthority('SELLER', 'USER')")
+    public ResponseEntity<List<ProductDto>> getMyProducts() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        Long userId = userPrincipal.getId();
+        List<Product> userProducts = productService.getProductsByUserId(userId);
+        List<ProductDto> userProductDTOs = userProducts.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userProductDTOs);
     }
 
     @GetMapping("/my-approved")
@@ -103,12 +116,10 @@ public class ProductController {
         dto.setRejectionReason(product.getRejectionReason());
         dto.setCreatedAt(product.getCreatedAt());
         dto.setUpdatedAt(product.getUpdatedAt());
-
         List<String> imageUrls = product.getImages().stream()
                 .map(ProductImage::getImageUrl)
                 .collect(Collectors.toList());
         dto.setImageUrls(imageUrls);
-
         return dto;
     }
 
@@ -137,16 +148,11 @@ public class ProductController {
 
             Product createdProduct = productService.createProduct(productDto, images);
 
+            // Aquí está el cambio principal - Convertimos el producto a DTO para incluir toda la información
+            ProductDto createdProductDto = convertToDTO(createdProduct);
             Map<String, Object> response = new HashMap<>();
-            response.put("id", createdProduct.getId());
-            response.put("name", createdProduct.getName());
-            response.put("status", createdProduct.getStatus());
+            response.put("product", createdProductDto);  // Incluimos el producto completo
             response.put("message", "Su producto está en proceso de revisión y se ha guardado como 'pendiente'. Recibirá una notificación una vez que se apruebe. ¡Gracias por contribuir a nuestra comunidad!");
-
-            List<String> imageUrls = createdProduct.getImages().stream()
-                    .map(ProductImage::getImageUrl)
-                    .collect(Collectors.toList());
-            response.put("images", imageUrls);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {

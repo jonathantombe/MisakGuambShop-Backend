@@ -1,194 +1,51 @@
 package com.misakguambshop.app.dto;
 
-import com.misakguambshop.app.model.ShipmentStatus;
 import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import lombok.Data;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.time.LocalDateTime;
+
+@Data
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class ShipmentDto {
 
     private Long id;
 
-    @NotNull
-    private Long orderId;
-
-    @NotBlank
-    @Size(min = 10, max = 255)
+    @NotBlank(message = "La dirección es obligatoria.")
+    @Pattern(regexp = "^.{5,}$", message = "La dirección debe tener al menos 5 caracteres.")
     private String address;
 
-    @NotBlank
-    @Pattern(regexp = "^[a-zA-Z\\sáéíóúÁÉÍÓÚñÑ]+$", message = "El nombre solo puede contener letras, espacios y caracteres especiales")
+    @NotBlank(message = "El nombre del destinatario es obligatorio")
+    @Pattern(regexp = "^[a-zA-Z0-9\\s]+$", message = "El nombre del destinatario solo puede contener letras, números y espacios.")
     private String recipientName;
 
-    @NotBlank
-    @Pattern(regexp = "^(\\+\\d{1,3})?[\\d\\s-]{7,15}$", message = "El número de teléfono debe ser válido y contener entre 7 y 15 caracteres")
+    @NotBlank(message = "El número de teléfono es obligatorio.")
+    @Pattern(regexp = "^[0-9]{10}$", message = "El número de teléfono debe tener 10 dígitos exactos.")
     private String phoneNumber;
 
-    @Email
+    @NotBlank(message = "El correo electrónico es obligatorio.")
+    @Email(message = "Por favor, ingrese un correo electrónico válido.")
     private String email;
 
-    @NotBlank
-    private String shippingMethod;
+    @NotBlank(message = "El departamento es obligatorio.")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "El departamento solo puede contener letras y espacios.")
+    private String department;
 
-    @NotNull
-    private LocalDate shippingDate;
-
-    @NotNull
-    private LocalDate estimatedDeliveryDate;
-
-    private LocalDate actualDeliveryDate;
-
-    @NotBlank
-    private String country;
-
-    @NotBlank
+    @NotBlank(message = "La ciudad es obligatoria.")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "La ciudad solo puede contener letras y espacios.")
     private String city;
 
-    @NotNull
-    private ShipmentStatus status;
+    @Pattern(regexp = "^[a-zA-Z\\s]*$", message = "El barrio solo puede contener letras y espacios.")
+    private String neighborhood;
 
-    private BigDecimal weight;
-    private BigDecimal shippingCost;
-    private BigDecimal insuranceCost;
+    @NotBlank(message = "El código postal es obligatorio.")
+    @Pattern(regexp = "^[0-9]{4,}$", message = "El código postal debe contener al menos 4 dígitos.")
+    private String postalCode;
 
-    @NotBlank(message = "El nombre de la empresa de envío es obligatorio")
-    private String shippingCompany;
+    @Size(max = 500, message = "Las notas de envío no pueden superar los 500 caracteres.")
+    private String shippingNotes;
 
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getRecipientName() {
-        return recipientName;
-    }
-
-    public void setRecipientName(String recipientName) {
-        this.recipientName = recipientName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getShippingMethod() {
-        return shippingMethod;
-    }
-
-    public void setShippingMethod(String shippingMethod) {
-        this.shippingMethod = shippingMethod;
-    }
-
-    public LocalDate getShippingDate() {
-        return shippingDate;
-    }
-
-    public void setShippingDate(LocalDate shippingDate) {
-        this.shippingDate = shippingDate;
-    }
-
-    public LocalDate getEstimatedDeliveryDate() {
-        return estimatedDeliveryDate;
-    }
-
-    public void setEstimatedDeliveryDate(LocalDate estimatedDeliveryDate) {
-        this.estimatedDeliveryDate = estimatedDeliveryDate;
-    }
-
-    public LocalDate getActualDeliveryDate() {
-        return actualDeliveryDate;
-    }
-
-    public void setActualDeliveryDate(LocalDate actualDeliveryDate) {
-        this.actualDeliveryDate = actualDeliveryDate;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public ShipmentStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ShipmentStatus status) {
-        this.status = status;
-    }
-
-    public BigDecimal getWeight() {
-        return weight;
-    }
-
-    public void setWeight(BigDecimal weight) {
-        this.weight = weight;
-    }
-
-    public BigDecimal getShippingCost() {
-        return shippingCost;
-    }
-
-    public void setShippingCost(BigDecimal shippingCost) {
-        this.shippingCost = shippingCost;
-    }
-
-    public BigDecimal getInsuranceCost() {
-        return insuranceCost;
-    }
-
-    public void setInsuranceCost(BigDecimal insuranceCost) {
-        this.insuranceCost = insuranceCost;
-    }
-
-    public String getShippingCompany() {
-        return shippingCompany;
-    }
-
-    public void setShippingCompany(String shippingCompany) {
-        this.shippingCompany = shippingCompany;
-    }
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

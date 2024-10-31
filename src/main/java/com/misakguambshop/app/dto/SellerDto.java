@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Data
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class SellerDto {
 
     private Long id;

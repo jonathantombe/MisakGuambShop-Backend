@@ -112,11 +112,26 @@ public class SecurityConfig {
 
                             //envíos
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/shipments/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/shipments/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/shipments/**")).hasAuthority("USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/shipments/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
 
+                            //pagos
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/payments")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/payments/{id}")).hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/payments")).hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/payments/{id}")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/payments/{id}")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/payments/**")).hasAuthority("ADMIN")
+
+                            //UserPaymentMethod
+                            .requestMatchers(HttpMethod.GET, "/api/user-payment-methods").hasAuthority("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/user-payment-methods/{id}").hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(HttpMethod.GET, "/api/user-payment-methods/user/{userId}").hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(HttpMethod.POST, "/api/user-payment-methods").hasAuthority("USER")
+                            .requestMatchers(HttpMethod.PUT, "/api/user-payment-methods/{id}").hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/api/user-payment-methods/{id}").hasAuthority("ADMIN")
 
                             // detalles pedidos
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/order-details/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
@@ -124,6 +139,12 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/order-details/**")).hasAnyAuthority("USER", "ADMIN")
+
+                            //reviews
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/reviews/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/reviews/**")).hasAnyAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/reviews/**")).hasAnyAuthority("USER", "ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/reviews/**")).hasAnyAuthority("USER", "ADMIN")
 
 
 
