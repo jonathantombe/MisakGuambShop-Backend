@@ -15,9 +15,6 @@ public class Shipment {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
-
     @Column(name = "address", nullable = false)
     private String address;
 
@@ -56,9 +53,8 @@ public class Shipment {
     public Shipment() {
     }
 
-    public Shipment(Long orderId, String address, String recipientName, String phoneNumber,
+    public Shipment(String address, String recipientName, String phoneNumber,
                     String email, String department, String city, String postalCode) {
-        this.orderId = orderId;
         this.address = address;
         this.recipientName = recipientName;
         this.phoneNumber = phoneNumber;
@@ -74,14 +70,6 @@ public class Shipment {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
     }
 
     public String getAddress() {

@@ -14,8 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/payments")
-//@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class PaymentController {
 
     private final PaymentService paymentService;

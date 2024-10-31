@@ -2,17 +2,15 @@ package com.misakguambshop.app.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 
 @Data
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class ShipmentDto {
 
     private Long id;
-
-    @NotNull(message = "El ID de la orden es obligatorio.")
-    @Positive(message = "El ID de la orden debe ser un número positivo.")
-    private Long orderId;
 
     @NotBlank(message = "La dirección es obligatoria.")
     @Pattern(regexp = "^.{5,}$", message = "La dirección debe tener al menos 5 caracteres.")
@@ -23,7 +21,7 @@ public class ShipmentDto {
     private String recipientName;
 
     @NotBlank(message = "El número de teléfono es obligatorio.")
-    @Pattern(regexp = "^[0-9]{10}$", message = "El número de teléfono debe tener exactamente 10 dígitos.")
+    @Pattern(regexp = "^[0-9]{10}$", message = "El número de teléfono debe tener 10 dígitos exactos.")
     private String phoneNumber;
 
     @NotBlank(message = "El correo electrónico es obligatorio.")
