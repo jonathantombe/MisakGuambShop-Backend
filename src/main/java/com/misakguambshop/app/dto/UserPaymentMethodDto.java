@@ -2,9 +2,11 @@ package com.misakguambshop.app.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 
 @Data
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class UserPaymentMethodDto {
 
     @NotNull(message = "El ID de usuario no puede ser nulo")
