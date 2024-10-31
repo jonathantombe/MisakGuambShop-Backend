@@ -198,7 +198,7 @@ public class UserServiceImpl implements UserService {
         String resetUrl = "http://localhost:5173/reset-password?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("plantillajs@gmail.com");
+        message.setFrom("noreply@misakguambshop.com");
         message.setTo(email);
         message.setSubject("Restablecer tu contraseña de MisakGuambShop");
         message.setText(String.format(
