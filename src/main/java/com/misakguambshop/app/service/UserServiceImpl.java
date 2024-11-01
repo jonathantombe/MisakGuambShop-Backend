@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -49,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -195,7 +199,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + email));
 
-        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+        // Usa baseUrl para construir la URL de restablecimiento de contraseña
+        String resetUrl = baseUrl + "/reset-password?token=" + token; // URL ahora dinámica
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("noreply@misakguambshop.com");
