@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/reviews")
+@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class ReviewController {
 
     @Autowired
