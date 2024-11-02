@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.math.BigDecimal;
 
-@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class OrderDetailsDto {
 
     private Long id;
