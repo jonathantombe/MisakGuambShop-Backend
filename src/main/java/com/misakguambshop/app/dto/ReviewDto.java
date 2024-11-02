@@ -3,7 +3,6 @@ package com.misakguambshop.app.dto;
 import jakarta.validation.constraints.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-@CrossOrigin(origins = "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
 public class ReviewDto {
 
     private Long id;
