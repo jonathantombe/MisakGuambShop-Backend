@@ -164,10 +164,16 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app")
+                        .allowedOrigins(
+                                "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app",
+                                "https://misak-guamb-shop-front-qxyi.vercel.app",
+                                "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app"
+                        )
                         .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .exposedHeaders("Authorization")
+                        .allowCredentials(true)
+                        .maxAge(3600);
             }
         };
     }
