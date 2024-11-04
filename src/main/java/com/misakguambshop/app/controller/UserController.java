@@ -193,7 +193,7 @@ public class UserController {
             User updatedUser = userService.deleteProfileImage(id);
             return ResponseEntity.ok().body(Map.of(
                     "success", true,
-                    "message", "Imagen de perfil eliminada con éxito",
+                    "message", "",
                     "user", updatedUser
             ));
         } catch (Exception e) {
