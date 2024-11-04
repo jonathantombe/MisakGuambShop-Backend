@@ -68,7 +68,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app",
                 "https://misak-guamb-shop-front-qxyi.vercel.app",
-                "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app"
+                "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app",
+                "http://localhost:5173"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
