@@ -55,7 +55,7 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String rejectionReason;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ProductImage> images = new ArrayList<>();
 
     public void addImage(ProductImage image) {
