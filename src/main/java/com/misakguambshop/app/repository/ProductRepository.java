@@ -21,6 +21,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByUserIdAndStatus(Long userId, ProductStatus status);
 
     List<Product> findByUserId(Long userId);
+    List<Product> findByStatus(String status);
 
     // Nuevos métodos para cargar productos con imágenes
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images WHERE p.id = :id")
