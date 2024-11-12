@@ -77,7 +77,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/api/auth/signup/user") ||
                 path.equals("/api/auth/signup/seller") ||
                 path.equals("/api/users/forgot-password") ||
-                path.equals("/api/users/reset-password");
+                path.equals("/api/users/reset-password") ||
+                path.startsWith("/api/products/approved");
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

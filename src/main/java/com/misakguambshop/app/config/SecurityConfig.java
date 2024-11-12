@@ -120,6 +120,7 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/categories/**")).hasAuthority("ADMIN")
 
                             //productos
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/products/approved")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/pending")).hasAuthority("ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/my-approved")).hasAnyAuthority("SELLER", "USER")

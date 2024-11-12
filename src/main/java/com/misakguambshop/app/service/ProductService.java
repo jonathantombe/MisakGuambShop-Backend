@@ -69,6 +69,13 @@ public class ProductService {
         return productRepository.findByUserIdAndStatus(userId, ProductStatus.APPROVED);
     }
 
+    public List<Product> getApprovedProducts() {
+        logger.info("Fetching approved products from repository");
+        List<Product> approvedProducts = productRepository.findByStatus(ProductStatus.APPROVED);
+        logger.info("Found {} approved products", approvedProducts.size());
+        return approvedProducts;
+    }
+
     public List<Product> getProductsByUserId(Long userId) {
         return productRepository.findByUserId(userId);
     }
@@ -83,7 +90,7 @@ public class ProductService {
         }
 
         if (productRepository.existsByNameAndUserId(productDto.getName(), productDto.getUserId())) {
-            throw new IllegalArgumentException("A product with this name already exists for this user");
+            throw new IllegalArgumentException("Ya existe un producto con este nombre");
         }
 
         Product product = new Product();
@@ -128,7 +135,7 @@ public class ProductService {
     private void notifyAdmin(Product product) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("noreply@misakguambshop.com");
-        message.setTo("plantillajs@gmail.com");
+        message.setTo("misakguambshop.oficial@gmail.com");
         message.setSubject("Nuevo producto pendiente de revisión - MisakGuambShop");
         message.setText(String.format(
                 "Estimado Administrador,\n\n" +

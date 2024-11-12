@@ -90,6 +90,18 @@ public class ProductController {
         return ResponseEntity.ok(approvedProductDTOs);
     }
 
+    @GetMapping("approved")
+    public ResponseEntity<List<ProductDto>> getApprovedProductsPublic() {
+        logger.info("Fetching approved products for public access");
+        List<Product> approvedProducts = productService.getApprovedProducts();
+        logger.info("Found {} approved products", approvedProducts.size());
+        List<ProductDto> approvedProductDTOs = approvedProducts.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(approvedProductDTOs);
+    }
+
+
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ProductDto>> getPendingProducts() {
