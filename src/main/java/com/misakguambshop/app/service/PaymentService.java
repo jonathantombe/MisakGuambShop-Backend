@@ -1,116 +1,117 @@
 package com.misakguambshop.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.misakguambshop.app.config.WompiConfig;
+import com.misakguambshop.app.controller.UserController;
 import com.misakguambshop.app.dto.PaymentDto;
 import com.misakguambshop.app.model.Payment;
-import com.misakguambshop.app.model.PaymentMethod;
 import com.misakguambshop.app.model.PaymentStatus;
-import com.misakguambshop.app.repository.PaymentMethodRepository;
 import com.misakguambshop.app.repository.PaymentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets; // IMPORTADO
+import java.security.MessageDigest; // IMPORTADO
+import java.security.NoSuchAlgorithmException; // IMPORTADO
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.Base64; // IMPORTADO
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
+    @Value("${epayco.private-key}")
+    private String epaycoPrivateKey;
 
-    private final PaymentMethodRepository paymentMethodRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    public List<Payment> getAllPayments() {
-        return paymentRepository.findAll();
+    public PaymentStatus getPaymentStatus(String referenceCode) {
+        // Aquí iría la lógica para obtener el estado del pago de la base de datos o API externa.
+        // Simulación de ejemplo:
+        logger.info("Fetching payment status for reference code: {}", referenceCode);
+        return PaymentStatus.PENDING; // Cambia esto según tu lógica.
     }
 
-    @Autowired
-    public PaymentService(PaymentRepository paymentRepository, PaymentMethodRepository paymentMethodRepository) {
-        this.paymentRepository = paymentRepository;
-        this.paymentMethodRepository = paymentMethodRepository;
+    public boolean validateSignature(Map<String, Object> payload) {
+        try {
+            String receivedSignature = (String) payload.get("x_signature");
+            String referenceCode = (String) payload.get("x_ref_payco");
+            String amount = (String) payload.get("x_amount");
+            String currency = (String) payload.get("x_currency_code");
+
+            // Concatenate values in the correct order
+            String baseString = String.format("%s^%s^%s^%s",
+                    epaycoPrivateKey,
+                    referenceCode,
+                    amount,
+                    currency
+            );
+
+            // Generate SHA-256 hash
+            String calculatedSignature = generateSHA256Hash(baseString);
+
+            return calculatedSignature.equals(receivedSignature);
+        } catch (Exception e) {
+            logger.error("Error validating signature", e);
+            return false;
+        }
     }
 
-    public Payment createPayment(PaymentDto paymentDto) {
-        // Buscar el método de pago
-        PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentDto.getPaymentMethodId())
-                .orElseThrow(() -> new RuntimeException("Método de pago no encontrado"));
+    public PaymentStatus processPaymentConfirmation(
+            String referenceCode,
+            String transactionState,
+            String orderId) {
 
-        Payment payment = new Payment();
-        payment.setOrderId(paymentDto.getOrderId());
-        payment.setUserId(paymentDto.getUserId());
-        payment.setAmount(paymentDto.getAmount());
-        payment.setCurrency(paymentDto.getCurrency());
-        payment.setPaymentMethod(paymentMethod);
+        PaymentStatus status = mapTransactionState(transactionState);
 
-        if (paymentDto.getPaymentStatus() != null) {
-            payment.setPaymentStatus(PaymentStatus.valueOf(paymentDto.getPaymentStatus().toUpperCase()));
-        } else {
-            throw new IllegalArgumentException("El campo paymentStatus es obligatorio");
-        }
+        // Update order status in your database
+        updateOrderStatus(orderId, status);
 
-        payment.setTransactionId(paymentDto.getTransactionId());
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setReceiptUrl(paymentDto.getReceiptUrl());
-        payment.setRefundAmount(paymentDto.getRefundAmount());
-        payment.setIpAddress(paymentDto.getIpAddress());
-
-        return paymentRepository.save(payment);
+        return status;
     }
-
-
-    public Optional<Payment> getPayment(Long id) {
-        return paymentRepository.findById(id);
-    }
-
-    public Payment updatePayment(Long id, PaymentDto paymentDto) {
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-
-        // Actualiza el monto
-        payment.setAmount(paymentDto.getAmount());
-
-        // Actualiza la moneda
-        if (paymentDto.getCurrency() != null) {
-            payment.setCurrency(paymentDto.getCurrency());
+    private void updateOrderStatus(String orderId, PaymentStatus status) {
+        // Aquí iría la lógica para actualizar el estado del pedido en la base de datos.
+        // Por ejemplo, usando un repositorio o un servicio adicional.
+        try {
+            // Simulación de lógica de actualización en base de datos
+            logger.info("Actualizando el estado del pedido {} a {}", orderId, status);
+            // Aquí puedes llamar a tu repositorio, como:
+            // orderRepository.updateStatus(orderId, status);
+        } catch (Exception e) {
+            logger.error("Error actualizando el estado del pedido {}: {}", orderId, e.getMessage());
         }
-
-        // Actualiza el estado de pago
-        if (paymentDto.getPaymentStatus() != null) {
-            payment.setPaymentStatus(PaymentStatus.valueOf(paymentDto.getPaymentStatus().toUpperCase()));
-        }
-
-        // Actualiza el método de pago si se proporciona un nuevo paymentMethodId
-        if (paymentDto.getPaymentMethodId() != null) {
-            PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentDto.getPaymentMethodId())
-                    .orElseThrow(() -> new RuntimeException("Método de pago no encontrado"));
-            payment.setPaymentMethod(paymentMethod);
-        }
-
-        // Actualiza otros campos
-        if (paymentDto.getTransactionId() != null) {
-            payment.setTransactionId(paymentDto.getTransactionId());
-        }
-
-        if (paymentDto.getReceiptUrl() != null) {
-            payment.setReceiptUrl(paymentDto.getReceiptUrl());
-        }
-
-        if (paymentDto.getRefundAmount() != null) {
-            payment.setRefundAmount(paymentDto.getRefundAmount());
-        }
-
-        if (paymentDto.getIpAddress() != null) {
-            payment.setIpAddress(paymentDto.getIpAddress());
-        }
-
-        payment.setUpdatedAt(LocalDateTime.now());
-
-        return paymentRepository.save(payment);
     }
 
 
-    public void deletePayment(Long id) {
-        paymentRepository.deleteById(id);
+
+    private PaymentStatus mapTransactionState(String transactionState) {
+        return switch (transactionState.toLowerCase()) {
+            case "accepted" -> PaymentStatus.COMPLETED;
+            case "rejected" -> PaymentStatus.REJECTED;
+            case "pending" -> PaymentStatus.PENDING;
+            default -> PaymentStatus.FAILED;
+        };
+    }
+
+    private String generateSHA256Hash(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating signature", e);
+        }
     }
 }
-
