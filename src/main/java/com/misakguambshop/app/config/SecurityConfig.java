@@ -121,6 +121,7 @@ public class SecurityConfig {
 
                             //productos
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/products/approved")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/products/detail/{id}")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/pending")).hasAuthority("ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/my-approved")).hasAnyAuthority("SELLER", "USER")
@@ -144,12 +145,9 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/shipments/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
 
                             //pagos
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/payments")).hasAuthority("ADMIN")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/payments/{id}")).hasAnyAuthority("USER", "SELLER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/payments/{transactionId}")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/payments")).hasAnyAuthority("USER", "SELLER")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/payments/{id}")).hasAnyAuthority("USER", "ADMIN")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/payments/{id}")).hasAnyAuthority("USER", "ADMIN")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/payments/**")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/payments/webhook")).hasAuthority("USER")
 
                             //UserPaymentMethod
                             .requestMatchers(HttpMethod.GET, "/api/user-payment-methods").hasAuthority("ADMIN")

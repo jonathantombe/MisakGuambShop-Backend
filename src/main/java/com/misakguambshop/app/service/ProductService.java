@@ -80,6 +80,12 @@ public class ProductService {
         return productRepository.findByUserId(userId);
     }
 
+    public Product getApprovedProductById(Long id) {
+        return productRepository.findByIdWithCategoryAndImages(id)
+                .filter(product -> product.getStatus() == ProductStatus.APPROVED)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+
     @Transactional
     public Product createProduct(ProductDto productDto, List<MultipartFile> images) {
         User user = userRepository.findById(productDto.getUserId())

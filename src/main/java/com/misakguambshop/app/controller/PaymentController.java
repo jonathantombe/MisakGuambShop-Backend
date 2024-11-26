@@ -1,11 +1,14 @@
 package com.misakguambshop.app.controller;
 
-
 import com.misakguambshop.app.dto.PaymentDto;
-import com.misakguambshop.app.model.Payment;
+import com.misakguambshop.app.model.PaymentStatus;
 import com.misakguambshop.app.service.PaymentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import java.util.Map;
+
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,45 +21,64 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<List<Payment>> getAllPayments() {
-        List<Payment> payments = paymentService.getAllPayments();
-        return ResponseEntity.ok(payments);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @Autowired
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
 
-    @PostMapping
-    @PreAuthorize("hasAnyAuthority('USER', 'SELLER')")
-    public ResponseEntity<Payment> createPayment(@RequestBody PaymentDto paymentDto) {
-        Payment payment = paymentService.createPayment(paymentDto);
-        return ResponseEntity.ok(payment);
+    @GetMapping("/success")
+    public ResponseEntity<Object> handlePaymentResponse(
+            @RequestParam("ref_payco") String referenceCode,
+            @RequestParam("x_transaction_state") String transactionState) {
+
+        logger.info("Payment response received - Reference: {}, State: {}",
+                referenceCode, transactionState);
+
+        try {
+            PaymentStatus status = paymentService.getPaymentStatus(referenceCode);
+            // Redirect to frontend with status
+            String redirectUrl = String.format(
+                    "http://your-frontend-url/payment/status?reference=%s&status=%s",
+                    referenceCode,
+                    status.toString()
+            );
+            return ResponseEntity.status(302)
+                    .header("Location", redirectUrl)
+                    .build();
+        } catch (Exception e) {
+            logger.error("Error processing payment response", e);
+            return ResponseEntity.status(500).body("Error processing payment");
+        }
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public ResponseEntity<Payment> getPayment(@PathVariable Long id) {
-        Optional<Payment> payment = paymentService.getPayment(id);
-        return payment.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    @PostMapping("/confirmation")
+    public ResponseEntity<String> handlePaymentConfirmation(@RequestBody Map<String, Object> payload) {
+        logger.info("Received ePayco confirmation: {}", payload);
+
+        try {
+            // Validate the signature
+            if (!paymentService.validateSignature(payload)) {
+                return ResponseEntity.badRequest().body("Invalid signature");
+            }
+
+            String referenceCode = (String) payload.get("x_ref_payco");
+            String transactionState = (String) payload.get("x_transaction_state");
+            String orderId = (String) payload.get("x_extra1");
+
+            PaymentStatus status = paymentService.processPaymentConfirmation(
+                    referenceCode,
+                    transactionState,
+                    orderId
+            );
+
+            return ResponseEntity.ok("Confirmation processed successfully");
+        } catch (Exception e) {
+            logger.error("Error processing payment confirmation", e);
+            return ResponseEntity.status(500).body("Error processing confirmation");
+        }
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody PaymentDto paymentDto) {
-        Payment payment = paymentService.updatePayment(id, paymentDto);
-        return ResponseEntity.ok(payment);
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
-        paymentService.deletePayment(id);
-        return ResponseEntity.noContent().build();
-    }
 }
 
 
