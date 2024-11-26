@@ -2,10 +2,12 @@ package com.misakguambshop.app.model;
 
 public enum PaymentStatus {
     PENDING,
-    PROCESSING,
     APPROVED,
+    COMPLETED,
     REJECTED,
     FAILED,
-    COMPLETED
+    DECLINED,
+    VOIDED,
+    ERROR
 }
 

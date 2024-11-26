@@ -134,6 +134,26 @@ public class ProductController {
         return dto;
     }
 
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<?> getPublicProductDetail(@PathVariable Long id) {
+        try {
+            logger.info("Fetching public product detail for id: {}", id);
+            Product product = productService.getApprovedProductById(id);
+            ProductDto productDto = convertToDTO(product);
+            return ResponseEntity.ok(productDto);
+        } catch (ResourceNotFoundException e) {
+            logger.error("Product not found with id: {}", id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Producto no encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            logger.error("Error fetching product detail", e);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error al obtener el detalle del producto");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER')")
     public ResponseEntity<?> createProduct(
