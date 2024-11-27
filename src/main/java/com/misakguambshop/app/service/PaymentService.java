@@ -1,30 +1,18 @@
 package com.misakguambshop.app.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.misakguambshop.app.config.WompiConfig;
 import com.misakguambshop.app.controller.UserController;
-import com.misakguambshop.app.dto.PaymentDto;
-import com.misakguambshop.app.model.Payment;
 import com.misakguambshop.app.model.PaymentStatus;
-import com.misakguambshop.app.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets; // IMPORTADO
 import java.security.MessageDigest; // IMPORTADO
 import java.security.NoSuchAlgorithmException; // IMPORTADO
-import java.time.LocalDateTime;
 import java.util.Base64; // IMPORTADO
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
