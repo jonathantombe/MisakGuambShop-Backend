@@ -60,6 +60,28 @@ public class ReviewService {
         return mapToDto(savedReview);
     }
 
+    public void rateProduct(Long productId, Long userId, int rating) {
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("La calificación debe estar entre 1 y 5.");
+        }
+
+        if (reviewRepository.existsByProductIdAndUserId(productId, userId)) {
+            throw new IllegalArgumentException("El usuario ya ha calificado este producto.");
+        }
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + productId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + userId));
+
+        Review review = new Review();
+        review.setRating(rating);
+        review.setProduct(product);
+        review.setUser(user);
+
+        reviewRepository.save(review);
+    }
+
     public ReviewDto updateReview(Long id, ReviewDto reviewDto) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada con ID: " + id));
@@ -89,3 +111,4 @@ public class ReviewService {
         return dto;
     }
 }
+

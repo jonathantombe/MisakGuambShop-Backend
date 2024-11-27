@@ -39,6 +39,15 @@ public class ReviewController {
         return ResponseEntity.status(201).body(reviewService.createReview(reviewDto));
     }
 
+    @PostMapping("/rate")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<String> rateProduct(@RequestParam Long productId,
+                                              @RequestParam Long userId,
+                                              @RequestParam int rating) {
+        reviewService.rateProduct(productId, userId, rating);
+        return ResponseEntity.ok("Producto calificado exitosamente con " + rating + " estrellas.");
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ResponseEntity<ReviewDto> updateReview(@PathVariable Long id, @Valid @RequestBody ReviewDto reviewDto) {
