@@ -20,7 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -85,6 +87,24 @@ public class ProductService {
                 .filter(product -> product.getStatus() == ProductStatus.APPROVED)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
+
+    public List<Product> getAvailableProducts() {
+        logger.info("Fetching available products");
+        List<Product> availableProducts = productRepository.findByStockGreaterThanAndStatus(0, ProductStatus.APPROVED);
+        logger.info("Found {} available products", availableProducts.size());
+        return availableProducts;
+    }
+
+    public Map<String, Object> getProductSales(Long productId) {
+        Product product = getProductById(productId);
+        Map<String, Object> salesInfo = new HashMap<>();
+        salesInfo.put("productId", productId);
+        salesInfo.put("name", product.getName());
+        // Por ahora retornamos un valor mock o 0
+        salesInfo.put("totalSales", 0); // Aquí posteriormente implementaremos la lógica real de ventas
+        return salesInfo;
+    }
+
 
     @Transactional
     public Product createProduct(ProductDto productDto, List<MultipartFile> images) {

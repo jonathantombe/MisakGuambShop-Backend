@@ -36,8 +36,6 @@ public class ProductController {
     private final CloudinaryService cloudinaryService;
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-
-
     @Autowired
     public ProductController(ProductService productService, CloudinaryService cloudinaryService) {
         this.productService = productService;
@@ -101,7 +99,6 @@ public class ProductController {
         return ResponseEntity.ok(approvedProductDTOs);
     }
 
-
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ProductDto>> getPendingProducts() {
@@ -151,6 +148,28 @@ public class ProductController {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Error al obtener el detalle del producto");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<ProductDto>> getAvailableProducts() {
+        List<Product> availableProducts = productService.getAvailableProducts();
+        List<ProductDto> availableProductDTOs = availableProducts.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(availableProductDTOs);
+    }
+
+    @GetMapping("/{id}/sales")
+    public ResponseEntity<?> getProductSales(@PathVariable Long id) {
+        try {
+            Map<String, Object> salesInfo = productService.getProductSales(id);
+            return ResponseEntity.ok(salesInfo);
+        } catch (ResourceNotFoundException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Product not found");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
 
