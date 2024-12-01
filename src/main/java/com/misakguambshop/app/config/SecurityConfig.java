@@ -25,8 +25,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
-import java.util.List;
 
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -65,7 +65,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app",
+                "https://misak-guamb-shop-front-qxyi.vercel.app",
+                "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app",
+                "http://localhost:5173",
+                "https://q9bsnf7k-5173.use2.devtunnels.ms/"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
