@@ -66,10 +66,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-                "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app",
-                "https://misak-guamb-shop-front-qxyi.vercel.app",
-                "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app",
-                "http://localhost:5173"
+                "*"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
@@ -114,10 +111,13 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/users/{id}/profile-image")).hasAnyAuthority("ADMIN", "USER")
 
                             //gestión  categorías
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/list")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/{id}")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/name/{name}")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/{id}/products")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/categories/**")).hasAuthority("ADMIN")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/**")).hasAuthority("ADMIN")
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/categories/**")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/{id}")).hasAuthority("ADMIN")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/categories/{id}")).hasAuthority("ADMIN")
 
                             //productos
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/products/approved")).permitAll()
