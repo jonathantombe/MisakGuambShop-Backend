@@ -2,6 +2,7 @@ package com.misakguambshop.app.controller;
 
 import com.misakguambshop.app.dto.CategoryDto;
 import com.misakguambshop.app.model.Category;
+import com.misakguambshop.app.model.Product;
 import com.misakguambshop.app.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +24,25 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER', 'USER')")
+    @GetMapping("/list")
     public ResponseEntity<List<Category>> getAllCategories() {
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER', 'USER')")
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
     @GetMapping("/name/{name}")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SELLER')")
     public ResponseEntity<Category> getCategoryByName(@PathVariable String name) {
         return ResponseEntity.ok(categoryService.getCategoryByName(name));
+    }
+
+    @GetMapping("/{categoryId}/products")
+    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable Long id) {
+        List<Product> products = categoryService.getProductsByCategory(id);
+        return ResponseEntity.ok(products);
     }
 
     @PostMapping
@@ -50,7 +54,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Category> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDto categoryDto) {
         Category category = new Category(categoryDto.getName(), categoryDto.getDescription());
         Category updatedCategory = categoryService.updateCategory(id, category);
@@ -58,12 +62,10 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
-
-
 }
 
