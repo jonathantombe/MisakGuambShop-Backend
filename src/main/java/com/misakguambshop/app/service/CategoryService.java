@@ -2,6 +2,7 @@ package com.misakguambshop.app.service;
 
 import com.misakguambshop.app.exception.ResourceNotFoundException;
 import com.misakguambshop.app.model.Category;
+import com.misakguambshop.app.model.Product;
 import com.misakguambshop.app.repository.CategoryRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,11 @@ public class CategoryService {
     public Category getCategoryByName(String name) {
         Optional<Category> category = categoryRepository.findByName(name);
         return category.orElseThrow(() -> new ResourceNotFoundException("Category not found with name: " + name));
+    }
+    public List<Product> getProductsByCategory(Long categoryId) {
+        // Implement the logic to get the products for the category
+        // You can use the CategoryRepository to make the database query
+        return categoryRepository.findProductsByCategory(categoryId);
     }
 
     public Category createCategory(Category category) {
