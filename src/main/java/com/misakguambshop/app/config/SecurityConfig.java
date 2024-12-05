@@ -69,8 +69,9 @@ public class SecurityConfig {
                 "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app",
                 "https://misak-guamb-shop-front-qxyi.vercel.app",
                 "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app",
-                "http://localhost:5173",
-                "https://q9bsnf7k-5173.use2.devtunnels.ms/"
+                "http://localhost:5174",
+                "https://q9bsnf7k-5173.use2.devtunnels.ms/",
+                "https://q9bsnf7k-8080.use2.devtunnels.ms/"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
@@ -118,7 +119,7 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/list")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/{id}")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/name/{name}")).permitAll()
-                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/{id}/products")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/categories/{categoryId}/products")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/categories/**")).hasAuthority("ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/categories/{id}")).hasAuthority("ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/categories/{id}")).hasAuthority("ADMIN")
@@ -128,9 +129,13 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/products/detail/{id}")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/products/available")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern("/api/products/{id}/sales")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/products/search")).permitAll()
+                            .requestMatchers(mvcMatcherBuilder.pattern("/api/products/search/{query}")).permitAll()
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/pending")).hasAuthority("ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/my-approved")).hasAnyAuthority("SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/{id}/disable")).hasAnyAuthority("SELLER", "USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/products/{id}/enable")).hasAnyAuthority("SELLER", "USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
