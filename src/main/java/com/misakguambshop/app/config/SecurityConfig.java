@@ -71,7 +71,8 @@ public class SecurityConfig {
                 "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app",
                 "http://localhost:5174",
                 "https://q9bsnf7k-5173.use2.devtunnels.ms/",
-                "https://q9bsnf7k-8080.use2.devtunnels.ms/"
+                "https://q9bsnf7k-8080.use2.devtunnels.ms/",
+                "https://misakguambshop-rest-api.up.railway.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
