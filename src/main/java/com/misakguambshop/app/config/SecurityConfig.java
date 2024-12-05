@@ -65,20 +65,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app",
-                "https://misak-guamb-shop-front-qxyi.vercel.app",
-                "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app",
-                "http://localhost:5174",
-                "https://q9bsnf7k-5173.use2.devtunnels.ms/",
-                "https://q9bsnf7k-8080.use2.devtunnels.ms/",
-                "https://misakguambshop-rest-api.up.railway.app"
-        ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        configuration.addAllowedOriginPattern("*");  // Permite cualquier origen
+        configuration.addAllowedMethod("*");         // Permite todos los métodos HTTP
+        configuration.addAllowedHeader("*");         // Permite todos los headers
+        configuration.setAllowCredentials(true);     // Permite credenciales
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
