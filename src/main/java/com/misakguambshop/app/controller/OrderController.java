@@ -3,10 +3,13 @@ package com.misakguambshop.app.controller;
 import com.misakguambshop.app.dto.OrderDto;
 import com.misakguambshop.app.exception.ResourceNotFoundException;
 import com.misakguambshop.app.service.OrderService;
+import com.misakguambshop.app.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -48,6 +51,18 @@ public class OrderController {
             orderDto.setOrderDate(LocalDateTime.now());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderDto));
+    }
+
+    @PostMapping("/my-orders")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<OrderDto> addPurchase(@RequestBody OrderDto orderDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        orderDto.setUserId(userPrincipal.getId());
+        OrderDto createdOrder = orderService.createOrder(orderDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
     @PutMapping("/{id}")

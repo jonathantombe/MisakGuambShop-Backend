@@ -69,7 +69,7 @@ public class SecurityConfig {
                 "https://misak-guamb-shop-front-git-develop-my-team-f83432a3.vercel.app",
                 "https://misak-guamb-shop-front-qxyi.vercel.app",
                 "https://misak-guamb-shop-front-qxyi-8zwcy77ib-jonathantombes-projects.vercel.app",
-                "http://localhost:5174",
+                "http://localhost:5173",
                 "https://q9bsnf7k-5173.use2.devtunnels.ms/",
                 "https://q9bsnf7k-8080.use2.devtunnels.ms/"
         ));
@@ -141,9 +141,10 @@ public class SecurityConfig {
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/products/**")).hasAnyAuthority("ADMIN", "SELLER")
 
-                            //pedidos
+                            //pedido
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.GET, "/api/orders/**")).hasAnyAuthority("USER", "SELLER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/orders/**")).hasAuthority("USER")
+                            .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.POST, "/api/orders/my-orders")).hasAuthority("USER")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PUT, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.PATCH, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
                             .requestMatchers(mvcMatcherBuilder.pattern(HttpMethod.DELETE, "/api/orders/**")).hasAnyAuthority("USER", "ADMIN")
