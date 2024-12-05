@@ -81,11 +81,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/api/products/approved") ||
                 path.startsWith("/api/products/detail/{id}") ||
                 path.startsWith("/api/products/available") ||
-                path.startsWith("/api/products/{id}/sales") ||
-                path.startsWith("/api/categories/list") ||
-                path.startsWith("/api/categories/{id}") ||
+                path.startsWith("/api/products/search") ||
+                path.matches("/api/products/search/.*") ||
+                path.startsWith("/api/products/{query}") ||
+                path.startsWith("/api/categories/") && path.endsWith("/products") ||  // Modificación aquí
+                path.matches("/api/categories/\\d+/products") ||
                 path.startsWith("/api/categories/name/{name}") ||
-                path.startsWith("/api/categories/{id}/products");
+                path.startsWith("/api/categories/{categoryId}/products");
 
     }
 

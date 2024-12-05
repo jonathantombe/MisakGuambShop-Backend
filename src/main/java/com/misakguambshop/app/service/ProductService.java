@@ -19,10 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -71,11 +68,9 @@ public class ProductService {
         return productRepository.findByUserIdAndStatus(userId, ProductStatus.APPROVED);
     }
 
-    public List<Product> getApprovedProducts() {
-        logger.info("Fetching approved products from repository");
-        List<Product> approvedProducts = productRepository.findByStatus(ProductStatus.APPROVED);
-        logger.info("Found {} approved products", approvedProducts.size());
-        return approvedProducts;
+    public List<Product> getPublicProducts(List<ProductStatus> statuses) {
+        logger.info("Fetching products with statuses: {}", statuses);
+        return productRepository.findByStatusIn(statuses);
     }
 
     public List<Product> getProductsByUserId(Long userId) {
@@ -95,6 +90,16 @@ public class ProductService {
         return availableProducts;
     }
 
+    public Product getActiveProductById(Long id) {
+        return productRepository.findByIdWithCategoryAndImages(id)
+                .filter(product ->
+                        product.getStatus() == ProductStatus.APPROVED ||
+                                product.getStatus() == ProductStatus.ENABLED)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+
+
+
     public Map<String, Object> getProductSales(Long productId) {
         Product product = getProductById(productId);
         Map<String, Object> salesInfo = new HashMap<>();
@@ -103,6 +108,27 @@ public class ProductService {
         // Por ahora retornamos un valor mock o 0
         salesInfo.put("totalSales", 0); // Aquí posteriormente implementaremos la lógica real de ventas
         return salesInfo;
+    }
+
+    public List<Product> searchProducts(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            logger.info("Empty search query, returning no results");
+            return Collections.emptyList();
+        }
+
+        logger.info("Searching products with query: {}", query);
+        List<Product> searchResults = productRepository.searchApprovedProducts(
+                query,
+                ProductStatus.APPROVED
+        );
+        logger.info("Found {} products matching the search query", searchResults.size());
+        return searchResults;
+    }
+
+    public Product updateProductAvailability(Long productId, boolean enable) {
+        Product product = getProductById(productId);
+        product.setStatus(enable ? ProductStatus.ENABLED : ProductStatus.DISABLED);
+        return productRepository.save(product);
     }
 
 

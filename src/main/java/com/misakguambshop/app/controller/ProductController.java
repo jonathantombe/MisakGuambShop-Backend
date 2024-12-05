@@ -4,6 +4,7 @@ import com.misakguambshop.app.dto.ProductDto;
 import com.misakguambshop.app.exception.ResourceNotFoundException;
 import com.misakguambshop.app.model.Product;
 import com.misakguambshop.app.model.ProductImage;
+import com.misakguambshop.app.model.ProductStatus;
 import com.misakguambshop.app.repository.ProductRepository;
 import com.misakguambshop.app.security.JwtAuthenticationFilter;
 import com.misakguambshop.app.security.UserPrincipal;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,13 +92,14 @@ public class ProductController {
 
     @GetMapping("approved")
     public ResponseEntity<List<ProductDto>> getApprovedProductsPublic() {
-        logger.info("Fetching approved products for public access");
-        List<Product> approvedProducts = productService.getApprovedProducts();
-        logger.info("Found {} approved products", approvedProducts.size());
-        List<ProductDto> approvedProductDTOs = approvedProducts.stream()
+        logger.info("Fetching approved and enabled products for public access");
+        List<ProductStatus> validStatuses = Arrays.asList(ProductStatus.APPROVED, ProductStatus.ENABLED);
+        List<Product> publicProducts = productService.getPublicProducts(validStatuses);
+        logger.info("Found {} public products", publicProducts.size());
+        List<ProductDto> publicProductDTOs = publicProducts.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(approvedProductDTOs);
+        return ResponseEntity.ok(publicProductDTOs);
     }
 
     @GetMapping("/pending")
@@ -135,7 +138,7 @@ public class ProductController {
     public ResponseEntity<?> getPublicProductDetail(@PathVariable Long id) {
         try {
             logger.info("Fetching public product detail for id: {}", id);
-            Product product = productService.getApprovedProductById(id);
+            Product product = productService.getActiveProductById(id);  // Cambiado de getApprovedProductById
             ProductDto productDto = convertToDTO(product);
             return ResponseEntity.ok(productDto);
         } catch (ResourceNotFoundException e) {
@@ -171,6 +174,22 @@ public class ProductController {
             errorResponse.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDto>> searchProducts(@RequestParam String query) {
+        logger.info("Received search request for query: {}", query);
+        List<Product> searchResults = productService.searchProducts(query);
+        List<ProductDto> searchResultDtos = searchResults.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        logger.info("Returning {} search results", searchResultDtos.size());
+        return ResponseEntity.ok(searchResultDtos);
+    }
+
+    @GetMapping("/search/{query}")
+    public ResponseEntity<List<ProductDto>> searchProductsByPathVariable(@PathVariable String query) {
+        return searchProducts(query);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -249,6 +268,38 @@ public class ProductController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al rechazar el producto: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/disable")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER')")
+    public ResponseEntity<?> disableProduct(@PathVariable Long id) {
+        try {
+            Product disabledProduct = productService.updateProductAvailability(id, false);
+            ProductDto disabledProductDto = convertToDTO(disabledProduct);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Producto deshabilitado con éxito");
+            response.put("product", disabledProductDto);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al deshabilitar el producto: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/enable")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER')")
+    public ResponseEntity<?> enableProduct(@PathVariable Long id) {
+        try {
+            Product enabledProduct = productService.updateProductAvailability(id, true);
+            ProductDto enabledProductDto = convertToDTO(enabledProduct);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Producto habilitado con éxito");
+            response.put("product", enabledProductDto);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al habilitar el producto: " + e.getMessage());
         }
     }
 
