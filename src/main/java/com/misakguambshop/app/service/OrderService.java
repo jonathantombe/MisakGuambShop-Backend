@@ -18,6 +18,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.misakguambshop.app.dto.OrderDto;
+import com.misakguambshop.app.exception.ResourceNotFoundException;
+import com.misakguambshop.app.model.Order;
+import com.misakguambshop.app.model.OrderStatus;
+import com.misakguambshop.app.model.PaymentStatus;
+import com.misakguambshop.app.model.User;
+import com.misakguambshop.app.repository.OrderRepository;
+import com.misakguambshop.app.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 public class OrderService {
 
@@ -30,6 +48,14 @@ public class OrderService {
     public List<OrderDto> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    // AÑADIDO: Nuevo método para obtener órdenes por userId
+    public List<OrderDto> getOrdersByUserId(Long userId) {
+        List<Order> userOrders = orderRepository.findByUserId(userId);
+        return userOrders.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }

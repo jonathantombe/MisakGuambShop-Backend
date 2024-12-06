@@ -53,16 +53,19 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderDto));
     }
 
-    @PostMapping("/my-orders")
+    @GetMapping("/my-orders")
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<OrderDto> addPurchase(@RequestBody OrderDto orderDto) {
+    public ResponseEntity<List<OrderDto>> getMyOrders() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        orderDto.setUserId(userPrincipal.getId());
-        OrderDto createdOrder = orderService.createOrder(orderDto);
+        List<OrderDto> userOrders = orderService.getOrdersByUserId(userPrincipal.getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
+        if (userOrders.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(userOrders);
     }
 
     @PutMapping("/{id}")
